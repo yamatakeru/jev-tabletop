@@ -54,8 +54,8 @@ def evaluate(d: Path) -> dict:
                for c, p in final["blocks"].items()}
     exp = set(cfg["expected"])
     got = {c for c, v in in_tray.items() if v}
-    m = [json.loads(line) for line in open(d / "metrics.jsonl")]
-    jev = [json.loads(line) for line in open(d / "jev_log.jsonl")]
+    m = [json.loads(line) for line in (d / "metrics.jsonl").read_text().splitlines()]
+    jev = [json.loads(line) for line in (d / "jev_log.jsonl").read_text().splitlines()]
     grasp = [r for r in m if r["event"] == "grasp_point"]
     held = [r for r in m if r["event"] == "held_check"]
     first = next(r for r in m if r["event"] == "decision")
