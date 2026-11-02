@@ -29,6 +29,7 @@ from tabletop.locate import coarse_to_fine  # noqa: E402
 from tabletop.scene import (  # noqa: E402
     BLOCK_HALF,
     COLORS,
+    DEFAULT_INSTRUCTION,
     TRAY_HALF,
     layout_from_env,
     load_model,
@@ -36,9 +37,7 @@ from tabletop.scene import (  # noqa: E402
     plane_to_pixel,
 )
 
-INSTRUCTION = os.environ.get(
-    "INSTRUCTION", "Put the red, blue and green cubes into the tray. Leave the yellow cube alone."
-)
+INSTRUCTION = os.environ.get("INSTRUCTION", DEFAULT_INSTRUCTION)
 MODE = os.environ.get("PERCEPTION", "jev")
 MAX_STEPS = int(os.environ.get("MAX_STEPS", "8"))
 # Scripted disturbance: during pick number DISTURB_STEP a "person" slides the target cube.

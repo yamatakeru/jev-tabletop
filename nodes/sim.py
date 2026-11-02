@@ -29,6 +29,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tabletop.scene import (  # noqa: E402
     BLOCK_HALF,
+    DEFAULT_INSTRUCTION,
     random_layout,
     block_positions,
     layout_from_env,
@@ -72,7 +73,7 @@ def main() -> None:
             os.environ.get("TITLE", "Jev x MuJoCo: zero-shot tabletop sorting"),
             [
                 "No training, no demonstrations",
-                f"Instruction: {os.environ.get('INSTRUCTION', '')}",
+                f"Instruction: {os.environ.get('INSTRUCTION', DEFAULT_INSTRUCTION)}",
                 "Perception & decisions: TypeSafe Jev (System One model, image input)",
             ],
             seconds=4.0,

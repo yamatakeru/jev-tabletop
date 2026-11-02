@@ -22,6 +22,10 @@ BLOCK_HALF = 0.022  # 4.4 cm cubes
 TRAY_HALF = (0.09, 0.09)  # inner half size (x, y)
 TRAY_WALL_H = 0.035
 
+DEFAULT_INSTRUCTION = (
+    "Put the red, blue and green cubes into the tray. Leave the yellow cube alone."
+)
+
 # Distinct, easy-to-name colours. Names are what the instruction / Jev talk about.
 COLORS: dict[str, tuple[float, float, float]] = {
     "red": (0.85, 0.12, 0.12),

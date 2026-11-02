@@ -43,7 +43,7 @@ def intro(path: Path, seconds: float, speed: float) -> None:
     ]
     for i, line in enumerate(lines):
         d.text((70, 290 + i * 48), line, font=font(JP_FONT_LIGHT, 26), fill=(220, 225, 235))
-    d.text((70, 640), f"※ 動画は全編 {speed:g} 倍速で再生しています（{speed:g}x speed）",
+    d.text((70, 640), f"※ 本編（デモ部分）は {speed:g} 倍速で再生しています（{speed:g}x speed）",
            font=font(JP_FONT, 24), fill=(255, 220, 120))
     arr = np.asarray(img)
     with imageio.get_writer(str(path), fps=FPS, codec="libx264", quality=8,
@@ -58,6 +58,8 @@ def main() -> None:
     ap.add_argument("clips", nargs="+")
     ap.add_argument("--speed", type=float, default=1.5)
     ap.add_argument("--intro", type=float, default=7.0)
+    ap.add_argument("--op", help="opening clip, played at 1x (scaled to 1280x720)")
+    ap.add_argument("--ed", help="ending clip, played at 1x (scaled to 1280x720)")
     a = ap.parse_args()
     with tempfile.TemporaryDirectory() as td:
         tdp = Path(td)
@@ -74,10 +76,24 @@ def main() -> None:
                                    fill=(255, 255, 255, 255))
         label.save(tdp / "label.png")
         fc = f"[0:v]setpts=PTS/{a.speed},fps={FPS}[v];[v][1:v]overlay=W-w-14:H-h-12"
+        main_mp4 = tdp / "main.mp4" if (a.op or a.ed) else Path(a.out)
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(joined), "-i",
                         str(tdp / "label.png"), "-filter_complex", fc, "-an",
-                        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", a.out],
+                        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", str(main_mp4)],
                        check=True)
+        if a.op or a.ed:
+            parts = [p for p in (a.op, str(main_mp4), a.ed) if p]
+            ins: list[str] = []
+            for p in parts:
+                ins += ["-i", p]
+            norm = "".join(
+                f"[{i}:v]scale={W}:{H}:force_original_aspect_ratio=decrease,"
+                f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,fps={FPS},setsar=1,format=yuv420p[v{i}];"
+                for i in range(len(parts)))
+            cat = "".join(f"[v{i}]" for i in range(len(parts))) + f"concat=n={len(parts)}:v=1:a=0[out]"
+            subprocess.run(["ffmpeg", "-v", "error", "-y", *ins, "-filter_complex", norm + cat,
+                            "-map", "[out]", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20",
+                            a.out], check=True)
     print("wrote", a.out)
 
 
