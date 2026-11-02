@@ -12,10 +12,11 @@ uv run python scripts/conf_analysis.py [--until HH:MM:SS] [--csv out.csv] LABEL=
   --until: only runs whose metrics.jsonl was last written at or before this local time
            (reproduces a snapshot of the logs as they were when a decision was made).
 
-The report's 96 picks (gate decision, before commit 416b3d8 at 04:36) are reproduced by:
+The report's 97 estimates are all those logged before the confidence gate was added (tag
+exp-v3): runs of the exp-v1 / exp-v2 stages plus trial, demo and interactive runs, e.g.
   uv run python scripts/conf_analysis.py --until 04:35:34 \\
-    v1=../jev-tabletop-exp/outputs/exp_v1 v2=../jev-tabletop-exp/outputs/exp_v2_nogate \\
-    trials='outputs/trial_*' demos=outputs/old interactive=outputs/interactive
+    v1=<exp-v1 runs> v2=<exp-v2 runs> trials='outputs/trial_*' demos=<demo runs>
+The resulting table is saved as results/conf_analysis/report96.csv.
 """
 
 from __future__ import annotations
