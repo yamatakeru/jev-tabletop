@@ -66,7 +66,7 @@ class Executor:
             x, y = skill["xy"]
             low = GRASP_Z if name == "pick" else PLACE_Z
             above = np.array([x, y, HOVER_Z])
-            q_above = self.ik.solve(self.q_des, above, R_DOWN)
+            q_above = self.ik.solve_global(self.q_des, above, R_DOWN)
             segs = []
             if name == "pick":
                 segs.append(Segment("grip", OPEN, 0.3))

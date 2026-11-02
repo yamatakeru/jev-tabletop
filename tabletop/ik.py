@@ -21,6 +21,25 @@ class IKSolver:
         # Nullspace posture (the "home" keyframe) keeps the elbow sensible.
         self.q_rest = model.key_qpos[model.key("home").id][:ARM_DOF].copy()
 
+    def pose_error(self, q: np.ndarray, target_pos: np.ndarray) -> float:
+        m, d = self.model, self.data
+        d.qpos[:ARM_DOF] = q
+        mujoco.mj_kinematics(m, d)
+        R = d.xmat[self.hand].reshape(3, 3)
+        tcp = d.xpos[self.hand] + R @ np.array([0, 0, TCP_OFFSET])
+        return float(np.linalg.norm(target_pos - tcp))
+
+    def solve_global(self, q_init: np.ndarray, target_pos, target_rot) -> np.ndarray:
+        """Multi-seed IK: the current posture can sit in a bad basin (e.g. the parked arm),
+        so also start from the rest posture and keep the most accurate solution."""
+        best, best_err = None, np.inf
+        for seed in (self.q_rest, q_init):
+            q = self.solve(seed, target_pos, target_rot, iters=150)
+            err = self.pose_error(q, target_pos)
+            if err < best_err:
+                best, best_err = q, err
+        return best
+
     def solve(
         self,
         q_init: np.ndarray,
