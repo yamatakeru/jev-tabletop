@@ -41,6 +41,7 @@ button.alt{background:#3a4152;color:#eee}
  <select id="lang"><option value="en-US">EN</option><option value="ja-JP">JA</option></select>
  <button class="alt" onclick="reset()">Shuffle cubes</button>
 </div>
+<div id="status" style="margin-top:8px;color:#f2a35e;font-size:14px"></div>
 <div id="hist"></div>
 <script>
 const t=document.getElementById('t');
@@ -50,13 +51,21 @@ function send(){if(t.value.trim()){post({text:t.value});t.value=''}}
 function reset(){post({reset:Math.floor(Math.random()*1000)})}
 async function refresh(){const h=await (await fetch('/history')).json();
  document.getElementById('hist').innerHTML=h.map(x=>'› '+x).reverse().join('<br>')}
-function listen(){const R=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!R){alert('Speech recognition not supported in this browser');return}
+const HINT={'not-allowed':'microphone permission denied (check the browser site setting and macOS System Settings > Privacy > Microphone)',
+ 'service-not-allowed':'speech service not allowed in this browser (use Google Chrome or Safari)',
+ 'network':'the browser could not reach its speech service (Chromium-based browsers other than Google Chrome, e.g. Arc or Brave, have none; use Google Chrome or Safari)',
+ 'audio-capture':'no microphone found','no-speech':'no speech heard - try again and speak right after clicking'};
+function status(m){document.getElementById('status').textContent=m}
+async function listen(){const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!R){status('Speech recognition is not supported in this browser (use Google Chrome or Safari).');return}
+ try{const s=await navigator.mediaDevices.getUserMedia({audio:true});s.getTracks().forEach(x=>x.stop())}
+ catch(e){status('Microphone unavailable: '+e.name+' - check the browser and macOS microphone permissions.');return}
  const r=new R();r.lang=document.getElementById('lang').value;r.interimResults=true;
- document.getElementById('mic').textContent='🎤 listening…';
+ const mic=document.getElementById('mic');mic.textContent='🎤 listening…';status('');
  r.onresult=e=>{t.value=Array.from(e.results).map(x=>x[0].transcript).join('');
    if(e.results[e.results.length-1].isFinal){send()}};
- r.onend=()=>{document.getElementById('mic').textContent='🎤 Speak'};r.start()}
+ r.onerror=e=>status('Speech recognition error: '+e.error+(HINT[e.error]?' - '+HINT[e.error]:''));
+ r.onend=()=>{mic.textContent='🎤 Speak'};r.start()}
 refresh();
 </script></body></html>"""
 
