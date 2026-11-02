@@ -1,0 +1,9 @@
+{
+  "name": "instr_rgb_light",
+  "instruction": "Put the cubes in the three primary colours of light into the tray.",
+  "expected": [
+    "red",
+    "green",
+    "blue"
+  ]
+}

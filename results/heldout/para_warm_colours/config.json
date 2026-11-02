@@ -1,0 +1,12 @@
+{
+  "name": "para_warm_colours",
+  "group": "phrasing",
+  "seed": 17,
+  "objects": "",
+  "instruction": "Put the cubes in warm colours, like the colours of fire, into the tray.",
+  "expected": [
+    "red",
+    "yellow"
+  ],
+  "version": "new"
+}

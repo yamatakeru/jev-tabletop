@@ -1,0 +1,13 @@
+{
+  "name": "para_clear_floor",
+  "group": "phrasing",
+  "seed": 15,
+  "objects": "",
+  "instruction": "Clear the floor: everything goes into the tray except the yellow block.",
+  "expected": [
+    "blue",
+    "green",
+    "red"
+  ],
+  "version": "new"
+}

@@ -1,0 +1,938 @@
+{
+ "new": [
+  {
+   "name": "layout_seed7",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.78,
+    0.86,
+    0.85
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    4,
+    3,
+    1,
+    2
+   ],
+   "refined_mm": [
+    10.4,
+    2.7,
+    4.6
+   ],
+   "zoom_queries": [
+    1,
+    1,
+    1
+   ],
+   "jev_calls": 18,
+   "jev_latency_sum_s": 7.3,
+   "wall_s": 49.2
+  },
+  {
+   "name": "layout_seed8",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.64,
+    0.85,
+    0.88
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    4,
+    3,
+    1,
+    1
+   ],
+   "refined_mm": [
+    10.3,
+    24.4,
+    5.2
+   ],
+   "zoom_queries": [
+    1,
+    1,
+    1
+   ],
+   "jev_calls": 19,
+   "jev_latency_sum_s": 7.25,
+   "wall_s": 46.7
+  },
+  {
+   "name": "layout_seed9",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.86,
+    0.88,
+    0.81
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    3,
+    2,
+    1,
+    2
+   ],
+   "refined_mm": [
+    0.6,
+    3.2,
+    5.0
+   ],
+   "zoom_queries": [
+    1,
+    1,
+    1
+   ],
+   "jev_calls": 16,
+   "jev_latency_sum_s": 5.3,
+   "wall_s": 45.7
+  },
+  {
+   "name": "layout_seed10",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.69,
+    0.73,
+    0.76
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    3,
+    4,
+    2,
+    2
+   ],
+   "refined_mm": [
+    6.3,
+    6.7,
+    13.8
+   ],
+   "zoom_queries": [
+    1,
+    1,
+    1
+   ],
+   "jev_calls": 19,
+   "jev_latency_sum_s": 6.15,
+   "wall_s": 45.4
+  },
+  {
+   "name": "layout_seed11",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.88,
+    0.82,
+    0.84
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    3,
+    3,
+    1,
+    2
+   ],
+   "refined_mm": [
+    9.5,
+    6.1,
+    5.9
+   ],
+   "zoom_queries": [
+    1,
+    1,
+    1
+   ],
+   "jev_calls": 17,
+   "jev_latency_sum_s": 6.1,
+   "wall_s": 46.0
+  },
+  {
+   "name": "para_clear_floor",
+   "group": "phrasing",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.81,
+    0.82,
+    0.9
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    3,
+    4,
+    1,
+    1
+   ],
+   "refined_mm": [
+    17.3,
+    5.1,
+    7.0
+   ],
+   "zoom_queries": [
+    1,
+    1,
+    1
+   ],
+   "jev_calls": 18,
+   "jev_latency_sum_s": 6.79,
+   "wall_s": 47.2
+  },
+  {
+   "name": "para_ja_only_blue",
+   "group": "phrasing",
+   "expected": [
+    "blue"
+   ],
+   "in_tray": [
+    "blue"
+   ],
+   "success": true,
+   "picks": 1,
+   "first_grasp_ok": 1,
+   "objects_tried": 1,
+   "held_agree": 1,
+   "held_n": 1,
+   "held_p_pos": [
+    0.78
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    1,
+    2
+   ],
+   "refined_mm": [
+    6.5
+   ],
+   "zoom_queries": [
+    1
+   ],
+   "jev_calls": 5,
+   "jev_latency_sum_s": 1.59,
+   "wall_s": 16.8
+  },
+  {
+   "name": "para_warm_colours",
+   "group": "phrasing",
+   "expected": [
+    "red",
+    "yellow"
+   ],
+   "in_tray": [
+    "red"
+   ],
+   "success": false,
+   "picks": 1,
+   "first_grasp_ok": 1,
+   "objects_tried": 1,
+   "held_agree": 1,
+   "held_n": 1,
+   "held_p_pos": [
+    0.84
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    3,
+    1
+   ],
+   "refined_mm": [
+    9.8
+   ],
+   "zoom_queries": [
+    1
+   ],
+   "jev_calls": 8,
+   "jev_latency_sum_s": 3.65,
+   "wall_s": 19.1
+  },
+  {
+   "name": "obj_ja_keep_purple",
+   "group": "new_object",
+   "expected": [
+    "blue",
+    "green",
+    "orange_cylinder",
+    "red",
+    "yellow"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "orange_cylinder",
+    "red",
+    "yellow"
+   ],
+   "success": true,
+   "picks": 5,
+   "first_grasp_ok": 5,
+   "objects_tried": 5,
+   "held_agree": 5,
+   "held_n": 5,
+   "held_p_pos": [
+    0.87,
+    0.86,
+    0.8,
+    0.8,
+    0.76
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    3,
+    3,
+    4,
+    3,
+    1,
+    1
+   ],
+   "refined_mm": [
+    7.4,
+    4.9,
+    7.3,
+    6.0,
+    4.7
+   ],
+   "zoom_queries": [
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "jev_calls": 32,
+   "jev_latency_sum_s": 10.38,
+   "wall_s": 76.7
+  },
+  {
+   "name": "obj_purple_and_orange",
+   "group": "new_object",
+   "expected": [
+    "orange_cylinder",
+    "purple"
+   ],
+   "in_tray": [
+    "orange_cylinder",
+    "purple"
+   ],
+   "success": true,
+   "picks": 2,
+   "first_grasp_ok": 2,
+   "objects_tried": 2,
+   "held_agree": 2,
+   "held_n": 2,
+   "held_p_pos": [
+    0.75,
+    0.84
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    2,
+    2,
+    2
+   ],
+   "refined_mm": [
+    7.8,
+    2.3
+   ],
+   "zoom_queries": [
+    1,
+    1
+   ],
+   "jev_calls": 11,
+   "jev_latency_sum_s": 3.93,
+   "wall_s": 31.9
+  },
+  {
+   "name": "obj_round_one",
+   "group": "new_object",
+   "expected": [
+    "orange_cylinder"
+   ],
+   "in_tray": [],
+   "success": false,
+   "picks": 0,
+   "first_grasp_ok": 0,
+   "objects_tried": 0,
+   "held_agree": 0,
+   "held_n": 0,
+   "held_p_pos": [],
+   "held_p_neg": [],
+   "n_candidates": [
+    2
+   ],
+   "refined_mm": [],
+   "zoom_queries": [],
+   "jev_calls": 3,
+   "jev_latency_sum_s": 1.45,
+   "wall_s": 2.8
+  }
+ ],
+ "old": [
+  {
+   "name": "layout_seed7",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "red"
+   ],
+   "success": false,
+   "picks": 8,
+   "first_grasp_ok": 1,
+   "objects_tried": 2,
+   "held_agree": 8,
+   "held_n": 8,
+   "held_p_pos": [
+    0.73
+   ],
+   "held_p_neg": [
+    0.1,
+    0.32,
+    0.34,
+    0.33,
+    0.32,
+    0.14,
+    0.12
+   ],
+   "n_candidates": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "refined_mm": [
+    10.2,
+    36.1,
+    118.6,
+    112.1,
+    115.9,
+    114.0,
+    60.2,
+    60.2
+   ],
+   "zoom_queries": [
+    2,
+    5,
+    4,
+    5,
+    5,
+    5,
+    5,
+    5
+   ],
+   "jev_calls": 52,
+   "jev_latency_sum_s": 14.52,
+   "wall_s": 93.7
+  },
+  {
+   "name": "layout_seed8",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.8,
+    0.81,
+    0.81
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "refined_mm": [
+    18.3,
+    4.4,
+    3.8
+   ],
+   "zoom_queries": [
+    2,
+    2,
+    2
+   ],
+   "jev_calls": 13,
+   "jev_latency_sum_s": 4.4,
+   "wall_s": 45.5
+  },
+  {
+   "name": "layout_seed9",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 4,
+   "first_grasp_ok": 2,
+   "objects_tried": 3,
+   "held_agree": 4,
+   "held_n": 4,
+   "held_p_pos": [
+    0.72,
+    0.92,
+    0.86
+   ],
+   "held_p_neg": [
+    0.03
+   ],
+   "n_candidates": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "refined_mm": [
+    283.1,
+    8.4,
+    2.7,
+    13.5
+   ],
+   "zoom_queries": [
+    5,
+    2,
+    2,
+    3
+   ],
+   "jev_calls": 21,
+   "jev_latency_sum_s": 7.48,
+   "wall_s": 56.7
+  },
+  {
+   "name": "layout_seed10",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.78,
+    0.7,
+    0.89
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "refined_mm": [
+    3.5,
+    5.7,
+    5.7
+   ],
+   "zoom_queries": [
+    2,
+    3,
+    2
+   ],
+   "jev_calls": 14,
+   "jev_latency_sum_s": 4.09,
+   "wall_s": 45.3
+  },
+  {
+   "name": "layout_seed11",
+   "group": "layout",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.83,
+    0.81,
+    0.78
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "refined_mm": [
+    4.6,
+    7.8,
+    4.6
+   ],
+   "zoom_queries": [
+    2,
+    3,
+    2
+   ],
+   "jev_calls": 14,
+   "jev_latency_sum_s": 3.96,
+   "wall_s": 44.2
+  },
+  {
+   "name": "para_clear_floor",
+   "group": "phrasing",
+   "expected": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red"
+   ],
+   "success": true,
+   "picks": 3,
+   "first_grasp_ok": 3,
+   "objects_tried": 3,
+   "held_agree": 3,
+   "held_n": 3,
+   "held_p_pos": [
+    0.81,
+    0.71,
+    0.86
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "refined_mm": [
+    7.6,
+    8.3,
+    7.9
+   ],
+   "zoom_queries": [
+    3,
+    2,
+    2
+   ],
+   "jev_calls": 14,
+   "jev_latency_sum_s": 3.93,
+   "wall_s": 45.2
+  },
+  {
+   "name": "para_ja_only_blue",
+   "group": "phrasing",
+   "expected": [
+    "blue"
+   ],
+   "in_tray": [
+    "blue"
+   ],
+   "success": true,
+   "picks": 1,
+   "first_grasp_ok": 1,
+   "objects_tried": 1,
+   "held_agree": 1,
+   "held_n": 1,
+   "held_p_pos": [
+    0.7
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    0,
+    0
+   ],
+   "refined_mm": [
+    10.4
+   ],
+   "zoom_queries": [
+    2
+   ],
+   "jev_calls": 5,
+   "jev_latency_sum_s": 1.71,
+   "wall_s": 16.0
+  },
+  {
+   "name": "para_warm_colours",
+   "group": "phrasing",
+   "expected": [
+    "red",
+    "yellow"
+   ],
+   "in_tray": [
+    "red",
+    "yellow"
+   ],
+   "success": true,
+   "picks": 2,
+   "first_grasp_ok": 2,
+   "objects_tried": 2,
+   "held_agree": 2,
+   "held_n": 2,
+   "held_p_pos": [
+    0.72,
+    0.84
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    0,
+    0,
+    0
+   ],
+   "refined_mm": [
+    6.6,
+    5.8
+   ],
+   "zoom_queries": [
+    2,
+    2
+   ],
+   "jev_calls": 9,
+   "jev_latency_sum_s": 2.87,
+   "wall_s": 31.0
+  },
+  {
+   "name": "obj_ja_keep_purple",
+   "group": "new_object",
+   "expected": [
+    "blue",
+    "green",
+    "orange_cylinder",
+    "red",
+    "yellow"
+   ],
+   "in_tray": [
+    "blue",
+    "green",
+    "red",
+    "yellow"
+   ],
+   "success": false,
+   "picks": 4,
+   "first_grasp_ok": 4,
+   "objects_tried": 4,
+   "held_agree": 4,
+   "held_n": 4,
+   "held_p_pos": [
+    0.81,
+    0.68,
+    0.82,
+    0.65
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "refined_mm": [
+    7.6,
+    2.9,
+    7.8,
+    7.8
+   ],
+   "zoom_queries": [
+    2,
+    3,
+    2,
+    4
+   ],
+   "jev_calls": 20,
+   "jev_latency_sum_s": 7.31,
+   "wall_s": 60.8
+  },
+  {
+   "name": "obj_purple_and_orange",
+   "group": "new_object",
+   "expected": [
+    "orange_cylinder",
+    "purple"
+   ],
+   "in_tray": [
+    "green"
+   ],
+   "success": false,
+   "picks": 1,
+   "first_grasp_ok": 1,
+   "objects_tried": 1,
+   "held_agree": 1,
+   "held_n": 1,
+   "held_p_pos": [
+    0.73
+   ],
+   "held_p_neg": [],
+   "n_candidates": [
+    0,
+    0
+   ],
+   "refined_mm": [
+    1.1
+   ],
+   "zoom_queries": [
+    2
+   ],
+   "jev_calls": 5,
+   "jev_latency_sum_s": 1.98,
+   "wall_s": 16.8
+  },
+  {
+   "name": "obj_round_one",
+   "group": "new_object",
+   "expected": [
+    "orange_cylinder"
+   ],
+   "in_tray": [],
+   "success": false,
+   "picks": 0,
+   "first_grasp_ok": 0,
+   "objects_tried": 0,
+   "held_agree": 0,
+   "held_n": 0,
+   "held_p_pos": [],
+   "held_p_neg": [],
+   "n_candidates": [
+    0
+   ],
+   "refined_mm": [],
+   "zoom_queries": [],
+   "jev_calls": 1,
+   "jev_latency_sum_s": 0.51,
+   "wall_s": 2.1
+  }
+ ]
+}

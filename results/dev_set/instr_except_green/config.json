@@ -1,0 +1,9 @@
+{
+  "name": "instr_except_green",
+  "instruction": "Put every cube except the green one into the tray.",
+  "expected": [
+    "red",
+    "blue",
+    "yellow"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "obj_round_one",
+  "group": "new_object",
+  "seed": 14,
+  "objects": "red,green,blue,yellow,orange:cylinder",
+  "instruction": "Tidy away the round object.",
+  "expected": [
+    "orange_cylinder"
+  ],
+  "version": "new"
+}

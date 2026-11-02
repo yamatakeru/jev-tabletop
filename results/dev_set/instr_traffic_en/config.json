@@ -1,0 +1,10 @@
+{
+  "name": "instr_traffic_en",
+  "seed": 3,
+  "instruction": "Put every cube whose colour appears on a traffic light into the tray.",
+  "expected": [
+    "red",
+    "green",
+    "yellow"
+  ]
+}

@@ -1,0 +1,4 @@
+{"event": "overview_box", "step": 0, "target": "tray", "center_err_frac": 0.03227677422762982}
+{"event": "decision", "step": 0, "next": "done", "remaining": 0.8, "n_queries": 3, "latency_s": 1.9931890964508057, "candidates": [{"var": "single", "c": [0.635, 0.435], "box": [0.61, 0.41, 0.66, 0.46], "conf": 0.84, "centre": 0.92, "wanted": 0.12, "score": 0.12, "latency_s": 1.220390796661377, "sim_label": "orange_cylinder"}, {"var": "bottom", "c": [0.625, 0.45999999999999996], "box": [0.6, 0.44, 0.65, 0.48], "conf": 0.73, "centre": 0.8, "wanted": 0.2, "score": 0.2, "latency_s": 0.4399552345275879, "sim_label": "orange_cylinder"}], "gt_in_tray": {"red": false, "green": false, "blue": false, "yellow": false, "orange_cylinder": false}}
+{"event": "end", "steps": 1}
+{"event": "wall_time_s", "value": 3.8029470443725586}

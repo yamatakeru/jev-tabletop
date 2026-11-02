@@ -1,0 +1,10 @@
+{
+  "name": "layout_seed1",
+  "seed": 1,
+  "instruction": "Put the red, blue and green cubes into the tray. Leave the yellow cube alone.",
+  "expected": [
+    "red",
+    "green",
+    "blue"
+  ]
+}

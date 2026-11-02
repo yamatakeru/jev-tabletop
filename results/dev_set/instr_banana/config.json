@@ -1,0 +1,7 @@
+{
+  "name": "instr_banana",
+  "instruction": "Put the cube that is the colour of a ripe banana into the tray.",
+  "expected": [
+    "yellow"
+  ]
+}

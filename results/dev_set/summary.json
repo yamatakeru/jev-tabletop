@@ -1,0 +1,390 @@
+[
+  {
+    "name": "instr_banana",
+    "instruction": "Put the cube that is the colour of a ripe banana into the tray.",
+    "expected": [
+      "yellow"
+    ],
+    "in_tray": [
+      "yellow"
+    ],
+    "success": true,
+    "first_choice": "yellow",
+    "picks": 1,
+    "held_fail": 0,
+    "held_agree": 1,
+    "held_n": 1,
+    "coarse_mm": [
+      7.8
+    ],
+    "refined_mm": [
+      4.9
+    ],
+    "jev_calls": 5,
+    "jev_latency_median": 0.27,
+    "input_tokens": 9579,
+    "wall_s": 16.173686981201172
+  },
+  {
+    "name": "instr_except_green",
+    "instruction": "Put every cube except the green one into the tray.",
+    "expected": [
+      "blue",
+      "red",
+      "yellow"
+    ],
+    "in_tray": [
+      "blue",
+      "red",
+      "yellow"
+    ],
+    "success": true,
+    "first_choice": "blue",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      1.9,
+      19.4,
+      8.7
+    ],
+    "refined_mm": [
+      12.1,
+      4.4,
+      9.6
+    ],
+    "jev_calls": 21,
+    "jev_latency_median": 0.268,
+    "input_tokens": 33228,
+    "wall_s": 46.32314920425415
+  },
+  {
+    "name": "instr_ja_explicit",
+    "instruction": "赤と青のキューブをトレイに入れてください。",
+    "expected": [
+      "blue",
+      "red"
+    ],
+    "in_tray": [
+      "blue",
+      "red"
+    ],
+    "success": true,
+    "first_choice": "red",
+    "picks": 2,
+    "held_fail": 0,
+    "held_agree": 2,
+    "held_n": 2,
+    "coarse_mm": [
+      8.1,
+      8.6
+    ],
+    "refined_mm": [
+      4.9,
+      11.3
+    ],
+    "jev_calls": 11,
+    "jev_latency_median": 0.335,
+    "input_tokens": 19258,
+    "wall_s": 32.16168689727783
+  },
+  {
+    "name": "instr_ja_traffic",
+    "instruction": "信号機の色のキューブをトレイに入れて。",
+    "expected": [
+      "green",
+      "red",
+      "yellow"
+    ],
+    "in_tray": [
+      "green",
+      "red",
+      "yellow"
+    ],
+    "success": true,
+    "first_choice": "yellow",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      7.8,
+      22.5,
+      21.6
+    ],
+    "refined_mm": [
+      1.6,
+      5.4,
+      4.8
+    ],
+    "jev_calls": 20,
+    "jev_latency_median": 0.315,
+    "input_tokens": 32234,
+    "wall_s": 45.768933057785034
+  },
+  {
+    "name": "instr_japan_flag",
+    "instruction": "Put the cubes that have a colour of the Japanese flag into the tray.",
+    "expected": [
+      "red"
+    ],
+    "in_tray": [
+      "red"
+    ],
+    "success": true,
+    "first_choice": "red",
+    "picks": 1,
+    "held_fail": 0,
+    "held_agree": 1,
+    "held_n": 1,
+    "coarse_mm": [
+      12.2
+    ],
+    "refined_mm": [
+      1.2
+    ],
+    "jev_calls": 7,
+    "jev_latency_median": 0.385,
+    "input_tokens": 11810,
+    "wall_s": 17.11147689819336
+  },
+  {
+    "name": "instr_rgb_light",
+    "instruction": "Put the cubes in the three primary colours of light into the tray.",
+    "expected": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "in_tray": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "success": true,
+    "first_choice": "blue",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      7.7,
+      9.2,
+      25.4
+    ],
+    "refined_mm": [
+      12.3,
+      7.0,
+      8.4
+    ],
+    "jev_calls": 21,
+    "jev_latency_median": 0.323,
+    "input_tokens": 33289,
+    "wall_s": 47.60987687110901
+  },
+  {
+    "name": "instr_traffic_en",
+    "instruction": "Put every cube whose colour appears on a traffic light into the tray.",
+    "expected": [
+      "green",
+      "red",
+      "yellow"
+    ],
+    "in_tray": [
+      "green",
+      "red",
+      "yellow"
+    ],
+    "success": true,
+    "first_choice": "green",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      33.7,
+      11.5,
+      24.2
+    ],
+    "refined_mm": [
+      7.9,
+      11.1,
+      5.9
+    ],
+    "jev_calls": 18,
+    "jev_latency_median": 0.262,
+    "input_tokens": 29936,
+    "wall_s": 45.338050842285156
+  },
+  {
+    "name": "layout_seed1",
+    "instruction": "Put the red, blue and green cubes into the tray. Leave the yellow cube alone.",
+    "expected": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "in_tray": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "success": true,
+    "first_choice": "green",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      15.0,
+      13.7,
+      12.9
+    ],
+    "refined_mm": [
+      11.0,
+      4.4,
+      11.8
+    ],
+    "jev_calls": 17,
+    "jev_latency_median": 0.334,
+    "input_tokens": 28875,
+    "wall_s": 45.34429693222046
+  },
+  {
+    "name": "layout_seed2",
+    "instruction": "Put the red, blue and green cubes into the tray. Leave the yellow cube alone.",
+    "expected": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "in_tray": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "success": true,
+    "first_choice": "green",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      16.2,
+      22.7,
+      14.4
+    ],
+    "refined_mm": [
+      2.5,
+      10.1,
+      4.7
+    ],
+    "jev_calls": 18,
+    "jev_latency_median": 0.291,
+    "input_tokens": 29976,
+    "wall_s": 45.27894687652588
+  },
+  {
+    "name": "layout_seed4",
+    "instruction": "Put the red, blue and green cubes into the tray. Leave the yellow cube alone.",
+    "expected": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "in_tray": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "success": true,
+    "first_choice": "red",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      16.7,
+      8.4,
+      7.1
+    ],
+    "refined_mm": [
+      1.0,
+      4.4,
+      4.6
+    ],
+    "jev_calls": 19,
+    "jev_latency_median": 0.321,
+    "input_tokens": 31096,
+    "wall_s": 47.23093509674072
+  },
+  {
+    "name": "layout_seed5",
+    "instruction": "Put the red, blue and green cubes into the tray. Leave the yellow cube alone.",
+    "expected": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "in_tray": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "success": true,
+    "first_choice": "red",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      18.1,
+      30.9,
+      18.5
+    ],
+    "refined_mm": [
+      3.3,
+      11.1,
+      7.1
+    ],
+    "jev_calls": 16,
+    "jev_latency_median": 0.264,
+    "input_tokens": 27764,
+    "wall_s": 47.23792505264282
+  },
+  {
+    "name": "layout_seed6",
+    "instruction": "Put the red, blue and green cubes into the tray. Leave the yellow cube alone.",
+    "expected": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "in_tray": [
+      "blue",
+      "green",
+      "red"
+    ],
+    "success": true,
+    "first_choice": "red",
+    "picks": 3,
+    "held_fail": 0,
+    "held_agree": 3,
+    "held_n": 3,
+    "coarse_mm": [
+      12.0,
+      8.2,
+      9.4
+    ],
+    "refined_mm": [
+      9.9,
+      9.5,
+      6.8
+    ],
+    "jev_calls": 18,
+    "jev_latency_median": 0.307,
+    "input_tokens": 30002,
+    "wall_s": 47.66809296607971
+  }
+]

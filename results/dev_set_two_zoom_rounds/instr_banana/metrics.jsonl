@@ -1,0 +1,9 @@
+{"event": "overview_box", "step": 0, "target": "tray", "center_err_frac": 0.01894891584770918}
+{"event": "decision", "step": 0, "next": "yellow", "remaining": 0.98, "n_queries": 2, "latency_s": 1.1816661357879639, "candidates": [{"var": "single", "c": [0.32499999999999996, 0.55], "box": [0.3, 0.52, 0.35, 0.58], "conf": 0.81, "centre": 0.89, "wanted": 0.91, "score": 0.89, "latency_s": 0.3776121139526367, "sim_label": "yellow"}], "gt_in_tray": {"red": false, "green": false, "blue": false, "yellow": false}}
+{"event": "grasp_point", "step": 0, "color": "yellow", "coarse_err_mm": 3.529716630141833, "refined_err_mm": 6.273617611127896, "rounds": [{"round": 0, "window": [0.22499999999999995, 0.45000000000000007, 0.2], "crop_box": [0.37, 0.37, 0.55, 0.65], "conf": 0.68, "visible": 0.96, "accepted": true, "full_box": [0.29899999999999993, 0.524, 0.33499999999999996, 0.5800000000000001], "latency_s": 0.29590511322021484, "err_mm": 7.765820307603319}, {"round": 1, "window": [0.24699999999999994, 0.48200000000000004, 0.14], "crop_box": [0.36, 0.36, 0.66, 0.67], "conf": 0.46, "visible": 0.96, "accepted": true, "full_box": [0.29739999999999994, 0.5324, 0.3393999999999999, 0.5758000000000001], "latency_s": 0.25846195220947266, "err_mm": 6.273617611127896}]}
+{"event": "held_check", "step": 0, "color": "yellow", "jev": 0.835, "gt": true}
+{"event": "place_check", "color": "yellow", "jev": 0.95, "gt": true}
+{"event": "overview_box", "step": 1, "target": "tray", "center_err_frac": 0.02135135999482886}
+{"event": "decision", "step": 1, "next": "done", "remaining": 0.03, "n_queries": 1, "latency_s": 0.3378770351409912, "candidates": [{"var": "single", "c": [0.71, 0.565], "box": [0.67, 0.55, 0.75, 0.58], "conf": 0.21, "sim_label": "yellow"}], "gt_in_tray": {"red": false, "green": false, "blue": false, "yellow": true}}
+{"event": "end", "steps": 2}
+{"event": "wall_time_s", "value": 17.186994791030884}

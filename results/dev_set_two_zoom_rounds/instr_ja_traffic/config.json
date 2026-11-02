@@ -1,0 +1,9 @@
+{
+  "name": "instr_ja_traffic",
+  "instruction": "信号機の色のキューブをトレイに入れて。",
+  "expected": [
+    "red",
+    "green",
+    "yellow"
+  ]
+}

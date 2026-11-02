@@ -1,0 +1,12 @@
+{
+  "name": "obj_purple_and_orange",
+  "group": "new_object",
+  "seed": 13,
+  "objects": "red,green,blue,yellow,purple,orange:cylinder",
+  "instruction": "Put the purple cube and the orange cylinder into the tray.",
+  "expected": [
+    "orange_cylinder",
+    "purple"
+  ],
+  "version": "new"
+}

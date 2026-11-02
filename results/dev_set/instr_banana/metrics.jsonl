@@ -1,0 +1,9 @@
+{"event": "overview_box", "step": 0, "target": "tray", "center_err_frac": 0.01894891584770918}
+{"event": "decision", "step": 0, "next": "yellow", "remaining": 0.98, "n_queries": 2, "latency_s": 1.1538450717926025, "candidates": [{"var": "single", "c": [0.32999999999999996, 0.55], "box": [0.31, 0.52, 0.35, 0.58], "conf": 0.8, "centre": 0.91, "wanted": 0.82, "score": 0.82, "latency_s": 0.26961827278137207, "sim_label": "yellow"}], "gt_in_tray": {"red": false, "green": false, "blue": false, "yellow": false}}
+{"event": "grasp_point", "step": 0, "color": "yellow", "coarse_err_mm": 7.764308808120477, "refined_err_mm": 4.892163655996982, "rounds": [{"round": 0, "window": [0.22999999999999995, 0.45000000000000007, 0.2], "crop_box": [0.37, 0.41, 0.58, 0.66], "conf": 0.55, "visible": 0.92, "accepted": true, "full_box": [0.30399999999999994, 0.532, 0.346, 0.5820000000000001], "latency_s": 0.22176599502563477, "err_mm": 4.892163655996982}]}
+{"event": "held_check", "step": 0, "color": "yellow", "jev": 0.7849999999999999, "gt": true}
+{"event": "place_check", "color": "yellow", "jev": 0.95, "gt": true}
+{"event": "overview_box", "step": 1, "target": "tray", "center_err_frac": 0.016501780511647548}
+{"event": "decision", "step": 1, "next": "done", "remaining": 0.04, "n_queries": 1, "latency_s": 0.37296366691589355, "candidates": [{"var": "single", "c": [0.7050000000000001, 0.56], "box": [0.66, 0.54, 0.75, 0.58], "conf": 0.19, "sim_label": "yellow"}], "gt_in_tray": {"red": false, "green": false, "blue": false, "yellow": true}}
+{"event": "end", "steps": 2}
+{"event": "wall_time_s", "value": 16.173686981201172}

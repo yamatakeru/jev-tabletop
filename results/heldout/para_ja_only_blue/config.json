@@ -1,0 +1,11 @@
+{
+  "name": "para_ja_only_blue",
+  "group": "phrasing",
+  "seed": 16,
+  "objects": "",
+  "instruction": "青いキューブだけを片付けてください。",
+  "expected": [
+    "blue"
+  ],
+  "version": "new"
+}

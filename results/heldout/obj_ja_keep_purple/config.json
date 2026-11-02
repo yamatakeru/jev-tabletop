@@ -1,0 +1,15 @@
+{
+  "name": "obj_ja_keep_purple",
+  "group": "new_object",
+  "seed": 12,
+  "objects": "red,green,blue,yellow,purple,orange:cylinder",
+  "instruction": "紫の物は残して、それ以外をすべてトレイに片付けて。",
+  "expected": [
+    "blue",
+    "green",
+    "orange_cylinder",
+    "red",
+    "yellow"
+  ],
+  "version": "new"
+}

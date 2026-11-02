@@ -1,0 +1,7 @@
+{
+  "name": "instr_japan_flag",
+  "instruction": "Put the cubes that have a colour of the Japanese flag into the tray.",
+  "expected": [
+    "red"
+  ]
+}

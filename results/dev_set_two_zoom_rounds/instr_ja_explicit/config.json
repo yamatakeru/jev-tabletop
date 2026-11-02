@@ -1,0 +1,8 @@
+{
+  "name": "instr_ja_explicit",
+  "instruction": "赤と青のキューブをトレイに入れてください。",
+  "expected": [
+    "red",
+    "blue"
+  ]
+}

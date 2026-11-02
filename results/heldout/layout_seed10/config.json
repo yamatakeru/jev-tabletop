@@ -1,0 +1,13 @@
+{
+  "name": "layout_seed10",
+  "group": "layout",
+  "seed": 10,
+  "objects": "",
+  "instruction": "Put the red, blue and green cubes into the tray. Leave the yellow cube alone.",
+  "expected": [
+    "blue",
+    "green",
+    "red"
+  ],
+  "version": "new"
+}
