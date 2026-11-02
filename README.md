@@ -102,6 +102,17 @@ older stages in a separate worktree (`git worktree add ../jt-v1 exp-v1`, then sy
 | open-vocabulary version on the development set (seeds 1,2,4,5,6 + 7 instructions) | `main` | `EXP_NAME=exp_ov_final uv run python scripts/experiments.py final && EXP_NAME=exp_ov_final uv run python scripts/experiments.py summary` |
 | adaptive-zoom threshold | `openvocab-frozen` | `EXP_NAME=dev_ov STOP_CONF=none uv run python scripts/experiments.py dev`, then `uv run python scripts/zoom_analysis.py outputs/dev_ov` |
 | held-out, new vs. old | `openvocab-frozen` + `closed-vocab-v3` (in `../jev-tabletop-closed`, with the frozen `tabletop/scene.py` copied in) | `uv run python scripts/heldout.py run new && uv run python scripts/heldout.py run old && uv run python scripts/heldout.py summary` |
+| demo videos (open-vocabulary) | `openvocab-frozen` | commands below |
+
+```bash
+RUN_DIR=outputs/demo_ov/demo1 TITLE="Demo 1: explicit instruction" uv run dora run dataflow.yml
+OBJECTS=red,green,blue,yellow,purple,orange:cylinder LAYOUT_SEED=23 INSTRUCTION="紫のキューブとオレンジの円柱をトレイに入れて。" \
+  RUN_DIR=outputs/demo_ov/demo2_take2 TITLE="Demo 2: new objects (purple cube, orange cylinder)" uv run dora run dataflow.yml
+OBJECTS=red,green,blue,yellow,orange:cylinder LAYOUT_SEED=22 INSTRUCTION="Tidy away the round object." \
+  RUN_DIR=outputs/demo_ov/demo2b TITLE="Demo 2b: object named by shape only" uv run dora run dataflow.yml
+DISTURB_STEP=1 RUN_DIR=outputs/demo_ov/demo3 TITLE="Demo 3: disturbance and recovery" uv run dora run dataflow.yml
+```
+(demo2 first take: same as demo2_take2 with `LAYOUT_SEED=21`.)
 
 Layout seeds: 1-6 development (3 = demo B), 7-17 held-out. Jev answers are not bit-exact
 across runs (the rendered scene differs slightly as the robot moves), so repeated runs can
