@@ -9,6 +9,7 @@ nodes:
       joint_cmd: controller/joint_cmd
       render_req: brain/render_req
       overlay: brain/overlay
+      disturb: brain/disturb
       finish: brain/finish
     outputs:
       - robot_state
@@ -32,4 +33,5 @@ nodes:
       - render_req
       - skill
       - overlay
+      - disturb
       - finish

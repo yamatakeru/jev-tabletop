@@ -40,6 +40,15 @@ SIM_DT = 0.02  # physics seconds per tick
 FRAME_EVERY = 2  # record every 2nd tick -> 25 fps of sim time
 
 
+def apply_disturbance(model, data, d: dict) -> dict | None:
+    """Slide a block along the floor (kinematically) as if a person pushed it."""
+    s = min((data.time - d["t0"]) / d["dur"], 1.0)
+    s = s * s * (3 - 2 * s)
+    data.qpos[d["adr"]:d["adr"] + 3] = d["start"] + (d["end"] - d["start"]) * s
+    data.qvel[d["dof"]:d["dof"] + 6] = 0.0
+    return None if s >= 1.0 else d
+
+
 def main() -> None:
     out_dir = Path(os.environ.get("RUN_DIR", "outputs/latest"))
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -56,19 +65,22 @@ def main() -> None:
         return r.render()
 
     video = VideoComposer(out_dir / "run.mp4", fps=25)
-    video.title_card(
-        "Jev x dora-rs x MuJoCo",
-        [
-            "Zero-shot tabletop sorting - no training, no demonstrations",
-            f"Instruction: {os.environ.get('INSTRUCTION', '')}",
-            "Perception & decisions: TypeSafe Jev (System One model, image input)",
-        ],
-        seconds=4.0,
-    )
+    if os.environ.get("NO_VIDEO", "") != "1":
+        video.title_card(
+            os.environ.get("TITLE", "Jev x MuJoCo: zero-shot tabletop sorting"),
+            [
+                "No training, no demonstrations",
+                f"Instruction: {os.environ.get('INSTRUCTION', '')}",
+                "Perception & decisions: TypeSafe Jev (System One model, image input)",
+            ],
+            seconds=4.0,
+        )
     node = Node()
     tick = 0
     last_cmd_time = -1.0
-    log = open(out_dir / "sim_events.jsonl", "w")
+    record = os.environ.get("NO_VIDEO", "") != "1"
+    disturb: dict | None = None  # active scripted disturbance ("a person slides a cube")
+    log = open(out_dir / "sim_events.jsonl", "w")  # noqa: SIM115
 
     for event in node:
         if event["type"] == "STOP":
@@ -77,6 +89,8 @@ def main() -> None:
             continue
         eid = event["id"]
         if eid == "tick":
+            if disturb is not None:
+                disturb = apply_disturbance(model, data, disturb)
             for _ in range(n_sub):
                 mujoco.mj_step(model, data)
             tick += 1
@@ -84,7 +98,7 @@ def main() -> None:
             state = np.concatenate([[data.time], data.qpos[:9], tcp])
             node.send_output("robot_state", pa.array(state))
             active = data.time - last_cmd_time < 0.1
-            if active and tick % FRAME_EVERY == 0:
+            if record and (active or disturb is not None) and tick % FRAME_EVERY == 0:
                 video.frame(render("front", 832, 624), sim_time=data.time)
         elif eid == "joint_cmd":
             cmd = event["value"].to_numpy()
@@ -108,12 +122,21 @@ def main() -> None:
                  "tag": req.get("tag", ""), "gt": json.dumps(gt)},
             )
             log.write(json.dumps({"wall": time.time(), "render": req, "gt": gt}) + "\n")
+        elif eid == "disturb":
+            req = json.loads(event["value"][0].as_py())
+            jid = model.joint(f"block_{req['color']}_joint").id
+            adr = model.jnt_qposadr[jid]
+            start = data.qpos[adr:adr + 3].copy()
+            disturb = {"adr": adr, "dof": model.jnt_dofadr[jid], "start": start,
+                       "end": start + np.array([*req["dxy"], 0.0]), "t0": data.time,
+                       "dur": float(req.get("duration", 0.8))}
+            log.write(json.dumps({"wall": time.time(), "disturb": req}) + "\n")
         elif eid == "finish":
             break
         elif eid == "overlay":
             ov = json.loads(event["value"][0].as_py())
             video.set_overlay(ov)
-            if ov.get("hold", 0) > 0:
+            if record and ov.get("hold", 0) > 0:
                 video.hold(render("front", 832, 624), seconds=float(ov["hold"]), sim_time=data.time)
             log.write(json.dumps({"wall": time.time(), "overlay": {k: v for k, v in ov.items() if k != "image_png"}}) + "\n")
             log.flush()

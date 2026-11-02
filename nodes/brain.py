@@ -41,6 +41,9 @@ INSTRUCTION = os.environ.get(
 )
 MODE = os.environ.get("PERCEPTION", "jev")
 MAX_STEPS = int(os.environ.get("MAX_STEPS", "8"))
+# Scripted disturbance: during pick number DISTURB_STEP a "person" slides the target cube.
+DISTURB_STEP = int(os.environ.get("DISTURB_STEP", "-1"))
+DISTURB_DXY = [float(v) for v in os.environ.get("DISTURB_DXY", "0.0,0.09").split(",")]
 HELD_THRESHOLD = 0.5
 PLACE_OFFSETS = [(-0.035, 0.035), (0.035, -0.035), (0.035, 0.035), (-0.035, -0.035)]
 DRAW_RGB = {"red": (230, 40, 40), "green": (40, 190, 60), "blue": (50, 90, 240),
@@ -190,8 +193,20 @@ class Brain:
                 hold=1.5)
 
             # ---- pick, then verify the grasp with the wrist camera
-            self.overlay(f"Executing pick({nxt})", "IK + Cartesian motion (controller node)")
-            self.skill("pick", target[:2])
+            if step == DISTURB_STEP:
+                self.overlay(f"Disturbance: a person slides the {nxt} cube away!",
+                             "The robot does not know - it still goes to the old grasp point")
+                time.sleep(0.5)  # let the banner reach the recorder before the cube moves
+                self.node.send_output("skill", pa.array([json.dumps(
+                    {"name": "pick", "xy": [float(target[0]), float(target[1])]})]))
+                self.node.send_output("disturb", pa.array([json.dumps(
+                    {"color": nxt, "dxy": DISTURB_DXY, "duration": 1.2})]))
+                self.metric({"event": "disturbance", "step": step, "color": nxt,
+                             "dxy": DISTURB_DXY})
+                self.wait("skill_done")
+            else:
+                self.overlay(f"Executing pick({nxt})", "IK + Cartesian motion (controller node)")
+                self.skill("pick", target[:2])
             fpng, fgt = self.render("wrist", 640, f"held_{step}")
             gt_held = fgt["blocks"][nxt][2] > 0.1
             hd = self.jev.held(fpng, nxt, gt_held)
