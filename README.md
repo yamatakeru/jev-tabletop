@@ -157,3 +157,7 @@ Git tags mark the stages: `exp-v1` (first version), `exp-v2` (IK fix), `exp-v3` 
 gate), `closed-vocab-v3` (same, before removing object names from the questions; its questions
 listed the four colours), `openvocab-frozen` (the code evaluated in the report; later commits
 change only defaults, documentation, analysis scripts, the web UI and video rendering).
+
+## License
+
+MIT (see [LICENSE](LICENSE)). The Franka Panda model fetched by `scripts/fetch_assets.sh` comes from MuJoCo Menagerie under Apache-2.0.
