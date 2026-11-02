@@ -84,7 +84,7 @@ class JevClient:
             if not (os.environ.get("TYPESAFE_API_KEY") or os.environ.get("JEV_API_KEY")):
                 raise RuntimeError("TYPESAFE_API_KEY not set (put it in .env)")
             key = os.environ.get("TYPESAFE_API_KEY") or os.environ["JEV_API_KEY"]
-            self.client = TypeSafeClient(api_key=key, model=os.environ.get("JEV_MODEL", "jev-latest"),
+            self.client = TypeSafeClient(api_key=key, model=os.environ.get("JEV_MODEL", "jev-1.14.0"),
                                          timeout=60)
 
     # ------------------------------------------------------------- low level

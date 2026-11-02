@@ -88,6 +88,25 @@ uv run python scripts/heldout.py run new|old       # pre-registered held-out con
 uv run python scripts/heldout.py summary           # -> outputs/heldout_summary.md
 ```
 
+### Reproducing the report
+
+Jev model: `jev-1.14.0` (default of `JEV_MODEL`; was `jev-latest` until after the freeze,
+which resolved to `jev-1.14.0` in every logged run). Tags mark the code of each stage; run
+older stages in a separate worktree (`git worktree add ../jt-v1 exp-v1`, then symlink
+`assets/menagerie` and `.env`).
+
+| report table | tag | command |
+|---|---|---|
+| v1 / v2 / v3 comparison (5 layouts, 6 instructions) | `exp-v1`, `exp-v2` (IK fix, no gate), `exp-v3` (confidence gate) | `uv run python scripts/experiments.py layouts && uv run python scripts/experiments.py instructions && uv run python scripts/experiments.py summary` |
+| traffic-light instruction (English, seed 3) | `closed-vocab-v3` | `LAYOUT_SEED=3 INSTRUCTION="Put every cube whose colour appears on a traffic light into the tray." RUN_DIR=outputs/demoB uv run dora run dataflow.yml` |
+| open-vocabulary version on the development set (seeds 1,2,4,5,6 + 7 instructions) | `main` | `EXP_NAME=exp_ov_final uv run python scripts/experiments.py final && EXP_NAME=exp_ov_final uv run python scripts/experiments.py summary` |
+| adaptive-zoom threshold | `openvocab-frozen` | `EXP_NAME=dev_ov STOP_CONF=none uv run python scripts/experiments.py dev`, then `uv run python scripts/zoom_analysis.py outputs/dev_ov` |
+| held-out, new vs. old | `openvocab-frozen` + `closed-vocab-v3` (in `../jev-tabletop-closed`, with the frozen `tabletop/scene.py` copied in) | `uv run python scripts/heldout.py run new && uv run python scripts/heldout.py run old && uv run python scripts/heldout.py summary` |
+
+Layout seeds: 1-6 development (3 = demo B), 7-17 held-out. Jev answers are not bit-exact
+across runs (the rendered scene differs slightly as the robot moves), so repeated runs can
+differ in individual decisions.
+
 Each run writes `run.mp4` (demo video), `jev_log.jsonl` (every Jev request/answer and
 latency) and `metrics.jsonl` (decisions, grasp-point error vs. ground truth, checks).
 

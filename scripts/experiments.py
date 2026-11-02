@@ -1,6 +1,6 @@
 """Batch experiments: robustness over layouts and instruction understanding.
 
-uv run python scripts/experiments.py layouts|instructions|dev|summary
+uv run python scripts/experiments.py layouts|instructions|dev|final|summary
 Each run: outputs/$EXP_NAME/<name>/ (default EXP_NAME=exp; metrics.jsonl, jev_log.jsonl,
 final_state.json, config.json). Jev model pinned with JEV_MODEL (default jev-1.14.0).
 """
@@ -33,6 +33,11 @@ INSTRUCTIONS = [
     {"name": "instr_ja_explicit", "instruction": "赤と青のキューブをトレイに入れてください。", "expected": ["red", "blue"]},
     {"name": "instr_ja_traffic", "instruction": "信号機の色のキューブをトレイに入れて。", "expected": ["red", "green", "yellow"]},
 ]
+
+# Old demo B condition (seed 3, English traffic-light instruction), part of the development set.
+TRAFFIC_EN = {"name": "instr_traffic_en", "seed": 3,
+              "instruction": "Put every cube whose colour appears on a traffic light into the tray.",
+              "expected": ["red", "green", "yellow"]}
 
 
 def run(cfg: dict) -> None:
@@ -94,5 +99,6 @@ if __name__ == "__main__":
         summary()
     else:
         for cfg in {"layouts": LAYOUTS, "instructions": INSTRUCTIONS,
-                    "dev": LAYOUTS + INSTRUCTIONS}[which]:
+                    "dev": LAYOUTS + INSTRUCTIONS,
+                    "final": LAYOUTS + INSTRUCTIONS + [TRAFFIC_EN]}[which]:
             run(cfg)
