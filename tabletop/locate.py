@@ -42,6 +42,7 @@ def coarse_to_fine(
     rounds: int = 2,
     conf_min: float = 0.3,
     max_queries: int = 5,
+    stop_conf: float | None = None,
 ) -> tuple[Box, list[dict]]:
     """Zoom in around the current estimate and re-ask Box.
 
@@ -49,6 +50,7 @@ def coarse_to_fine(
     Confidence gating: an answer with Box confidence < conf_min (or the target judged not
     visible) is rejected - the estimate is kept and the crop is widened before asking again.
     Low Box confidence was found to predict large localisation errors.
+    Adaptive depth: once an accepted answer has confidence >= stop_conf, stop zooming.
     """
     box = coarse
     trace: list[dict] = []
@@ -69,12 +71,14 @@ def coarse_to_fine(
         if best is None or conf > best[0]:
             best = (conf, cand)
         trace.append({"round": len(trace), "window": [l0, t0, size], "crop_box": ans["box"],
-                      "conf": conf, "visible": vis, "accepted": ok,
+                      "conf": conf, "visible": vis, "accepted": ok, "full_box": cand,
                       "latency_s": ans.get("latency_s"), "crop_img": cimg})
         if ok:
             box = cand
             accepted += 1
             widen = 1.0
+            if stop_conf is not None and conf >= stop_conf:
+                break
         else:
             widen *= 1.7
     if accepted == 0 and best is not None:

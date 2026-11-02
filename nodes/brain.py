@@ -24,11 +24,10 @@ from dora import Node
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tabletop.jev import JevClient  # noqa: E402
-from tabletop.locate import coarse_to_fine  # noqa: E402
-from tabletop.scene import (  # noqa: E402
+from tabletop.jev import VERIFY_CROP, JevClient
+from tabletop.locate import coarse_to_fine, crop_png, crop_window
+from tabletop.scene import (
     BLOCK_HALF,
-    COLORS,
     DEFAULT_INSTRUCTION,
     TRAY_HALF,
     layout_from_env,
@@ -45,8 +44,13 @@ DISTURB_STEP = int(os.environ.get("DISTURB_STEP", "-1"))
 DISTURB_DXY = [float(v) for v in os.environ.get("DISTURB_DXY", "0.0,0.09").split(",")]
 HELD_THRESHOLD = 0.5
 PLACE_OFFSETS = [(-0.035, 0.035), (0.035, -0.035), (0.035, 0.035), (-0.035, -0.035)]
-DRAW_RGB = {"red": (230, 40, 40), "green": (40, 190, 60), "blue": (50, 90, 240),
-            "yellow": (230, 190, 0), "tray": (90, 90, 100)}
+# Adaptive zoom depth: stop after one accepted zoom if its Box confidence >= STOP_CONF;
+# otherwise zoom once more (and low-confidence answers are rejected by the gate).
+# Chosen on development runs only (scripts/zoom_analysis.py): 42 picks, all first answers
+# >= 0.52; one zoom vs two: median 6.7 vs 6.5 mm, max 16.6 vs 17.0 mm, queries 1.0 vs 2.0.
+# STOP_CONF=none -> always two accepted rounds (how the development data was collected).
+_STOP = os.environ.get("STOP_CONF", "0.5")
+STOP_CONF = None if _STOP.lower() == "none" else float(_STOP)
 
 
 class Stop(Exception):
@@ -61,6 +65,8 @@ class Brain:
         self.jev = JevClient(MODE, run_dir / "jev_log.jsonl")
         self.metrics = open(run_dir / "metrics.jsonl", "w")  # noqa: SIM115
         self.n_placed = 0
+        self.img_dir = run_dir / "images"  # what Jev saw at the held check (for inspection)
+        self.img_dir.mkdir(exist_ok=True)
 
     # ------------------------------------------------------------- dora io
     def wait(self, input_id: str) -> dict:
@@ -123,71 +129,99 @@ class Brain:
         v = (box[1] + box[3]) / 2
         return pixel_to_plane(self.model, self.data, u, v, z)
 
+    def sim_label(self, box, gtv: dict) -> str:
+        """Simulator object nearest to an image box: evaluation / display only."""
+        c = np.array([(box[0] + box[2]) / 2, (box[1] + box[3]) / 2])
+        names = [n for n in gtv["boxes"] if n != "tray"]
+        return min(names, key=lambda n: np.linalg.norm(c - _centre(gtv["boxes"][n])))
+
     # ---------------------------------------------------------------- loop
     def run(self, instruction: str = INSTRUCTION) -> None:
         self.overlay("Starting", instruction)
         self.skill("park")
-        last_placed: str | None = None
+        last_label: str | None = None  # simulator label of the last placed object (eval only)
+        last_ref: bytes | None = None  # Jev-side identity of the last placed object: a close-up
         tray_xy = None
         step = 0
         for step in range(MAX_STEPS):
             png, gt = self.render("overhead", 768, f"overview_{step}")
             gtv = self.gt_view(gt)
-            ov = self.jev.overview(png, instruction, last_placed, {**gt, **gtv})
+            ov = self.jev.overview(png, instruction, last_ref, {**gt, **gtv})
             img = Image.open(io.BytesIO(png)).convert("RGB")
-            draw_boxes(img, ov["boxes"])
-            probs = sorted(ov["next_probs"].items(), key=lambda kv: -kv[1])
-            lines = [f"Jev overview query: {ov['latency_s'] * 1000:.0f} ms ({MODE})",
-                     "Choice next: " + "  ".join(f"{k} {p:.2f}" for k, p in probs[:4])]
-            lines.append("Noul in tray: " + "  ".join(
-                f"{c} {ov['in_tray'][c]:.2f}" for c in COLORS))
-            if last_placed:
-                ok = ov["in_tray"][last_placed]
-                lines.append(f"Check: {last_placed} placed in tray?  p={ok:.2f}")
-                self.metric({"event": "place_check", "color": last_placed, "jev": ok,
-                             "gt": gtv["in_tray"][last_placed]})
-            for c in [*COLORS, "tray"]:
-                err = _center_err(ov["boxes"].get(c), gtv["boxes"][c])
-                self.metric({"event": "overview_box", "step": step, "target": c,
-                             "center_err_frac": err, "conf": ov["box_conf"].get(c)})
-            self.metric({"event": "decision", "step": step, "next": ov["next"],
-                         "probs": ov["next_probs"], "gt_in_tray": gtv["in_tray"]})
-            nxt = ov["next"]
+            for cd in ov["candidates"]:
+                cd["sim_label"] = self.sim_label(cd["box"], gtv)
+            label = self.sim_label(ov["target"], gtv) if ov["target"] else None
+            draw_boxes(img, {"tray": ov["tray"]})
+            for cd in ov["candidates"]:
+                draw_boxes(img, {cd["var"]: cd["box"]}, (160, 160, 160))
+            if ov["target"]:
+                draw_boxes(img, {"target": ov["target"]}, (255, 0, 200))
+            lines = [f"Jev overview: {ov['latency_s'] * 1000:.0f} ms, {ov['n_queries']} queries ({MODE})",
+                     f"Noul 'anything left to move?' p={ov['remaining']:.2f}"]
+            if ov["candidates"] and "score" in ov["candidates"][0]:
+                lines.append("Candidates (Box) verified by Noul on close-ups: " + "  ".join(
+                    f"{cd['score']:.2f}" for cd in ov["candidates"]))
+            if last_label is not None and ov["placed_ok"] is not None:
+                lines.append(f"Check: last object in the tray?  p={ov['placed_ok']:.2f}")
+                self.metric({"event": "place_check", "color": last_label, "jev": ov["placed_ok"],
+                             "gt": gtv["in_tray"][last_label]})
+            self.metric({"event": "overview_box", "step": step, "target": "tray",
+                         "center_err_frac": _center_err(ov["tray"], gtv["boxes"]["tray"])})
+            self.metric({"event": "decision", "step": step, "next": label or "done",
+                         "remaining": ov["remaining"], "n_queries": ov["n_queries"],
+                         "latency_s": ov["latency_s"],
+                         "candidates": [{k: v for k, v in cd.items() if k != "png"}
+                                        for cd in ov["candidates"]],
+                         "gt_in_tray": gtv["in_tray"]})
             if tray_xy is None:
-                tray_xy = self.box_to_world(ov["boxes"]["tray"], 0.0)[:2]
-            if nxt == "done":
+                tray_xy = self.box_to_world(ov["tray"], 0.0)[:2]
+            if label is None:
                 self.overlay("Jev: the instruction is satisfied -> done", instruction, lines, img,
                              hold=3.5)
                 break
-            self.overlay(f"Jev decides: pick the {nxt} cube next (p={ov['next_probs'][nxt]:.2f})",
+            self.overlay(f"Jev picks the next object ({label} - label from simulator, display only)",
                          instruction, lines, img, hold=2.5)
 
-            # ---- coarse-to-fine: re-ask Jev Box on zoomed crops for a precise grasp point
+            # ---- coarse-to-fine: re-ask Jev Box on zoomed crops, tracking the chosen object by
+            # its appearance (close-up reference image), not by a name
             big, _ = self.render("overhead", 1280, f"refine_{step}")
             bimg = Image.open(io.BytesIO(big)).convert("RGB")
-            bx = ov["boxes"][nxt]
+            ref = ov["ref_png"]
             final_box, trace = coarse_to_fine(
-                bimg, bx, lambda png, g, c=nxt: self.jev.refine(png, c, g), gt=gtv["boxes"][nxt])
+                bimg, ov["target"], lambda png, g, r=ref: self.jev.refine(png, r, g),
+                gt=gtv["boxes"][label], stop_conf=STOP_CONF)
+            # Close-up of the localised object: its identity for the held / placed checks.
+            cu, cv = _centre(final_box)
+            l0, t0 = crop_window((cu, cv, cu, cv), VERIFY_CROP)
+            ref, _ = crop_png(bimg, l0, t0, VERIFY_CROP)
             target = self.box_to_world(final_box, BLOCK_HALF * 1.5)
-            true = np.array(gt["blocks"][nxt])
+            true = np.array(gt["blocks"][label])
             err_mm = float(np.linalg.norm(target[:2] - true[:2]) * 1000)
-            coarse = self.box_to_world(bx, BLOCK_HALF * 1.5)
+            coarse = self.box_to_world(ov["target"], BLOCK_HALF * 1.5)
             coarse_mm = float(np.linalg.norm(coarse[:2] - true[:2]) * 1000)
-            self.metric({"event": "grasp_point", "step": step, "color": nxt,
-                         "coarse_err_mm": coarse_mm, "refined_err_mm": err_mm,
-                         "rounds": [{k: v for k, v in t.items() if k != "crop_img"} for t in trace]})
+            rounds = []
+            for t in trace:
+                rec = {k: v for k, v in t.items() if k != "crop_img"}
+                w = self.box_to_world(t["full_box"], BLOCK_HALF * 1.5)
+                rec["err_mm"] = float(np.linalg.norm(w[:2] - true[:2]) * 1000)
+                rounds.append(rec)
+            self.metric({"event": "grasp_point", "step": step, "color": label,
+                         "coarse_err_mm": coarse_mm, "refined_err_mm": err_mm, "rounds": rounds})
             for t in trace:
                 crop = t["crop_img"]
-                draw_boxes(crop, {nxt: t["crop_box"]})
+                draw_boxes(crop, {"target": t["crop_box"]}, (255, 0, 200))
                 lat = (t["latency_s"] or 0) * 1000
                 verdict = ("accepted" if t["accepted"]
                            else "LOW confidence -> rejected, widen the crop and ask again")
                 self.overlay(
-                    f"Jev Box, query {t['round'] + 1}/{len(trace)}: locating the {nxt} cube",
+                    f"Jev Box, query {t['round'] + 1}/{len(trace)}: the object that looks like "
+                    "the chosen one",
                     f"crop = {t['window'][2] * 100:.0f}% of the overhead image; "
                     f"confidence {t['conf'] or 0:.2f} -> {verdict}",
                     [f"Box query: {lat:.0f} ms, confidence {t['conf'] or 0:.2f}",
-                     "Confidence gate: accept only if confidence >= 0.30"], crop, hold=1.2,
+                     "Confidence gate: accept only if confidence >= 0.30",
+                     f"Adaptive zoom: stop once an accepted answer has confidence >= {STOP_CONF}"],
+                    crop, hold=1.2,
                     panel="What Jev sees (zoomed crop of the overhead camera)")
             self.overlay(
                 f"Grasp point x={target[0]:.3f} m, y={target[1]:.3f} m",
@@ -197,62 +231,64 @@ class Brain:
 
             # ---- pick, then verify the grasp with the wrist camera
             if step == DISTURB_STEP:
-                self.overlay(f"Disturbance: a person slides the {nxt} cube away!",
+                self.overlay("Disturbance: a person slides the object away!",
                              "The robot does not know - it still goes to the old grasp point")
-                time.sleep(0.5)  # let the banner reach the recorder before the cube moves
+                time.sleep(0.5)  # let the banner reach the recorder before the object moves
                 self.node.send_output("skill", pa.array([json.dumps(
                     {"name": "pick", "xy": [float(target[0]), float(target[1])]})]))
                 self.node.send_output("disturb", pa.array([json.dumps(
-                    {"color": nxt, "dxy": DISTURB_DXY, "duration": 1.2})]))
-                self.metric({"event": "disturbance", "step": step, "color": nxt,
+                    {"color": label, "dxy": DISTURB_DXY, "duration": 1.2})]))
+                self.metric({"event": "disturbance", "step": step, "color": label,
                              "dxy": DISTURB_DXY})
                 self.wait("skill_done")
             else:
-                self.overlay(f"Executing pick({nxt})", "IK + Cartesian motion (controller node)")
+                self.overlay("Executing pick(x, y)", "IK + Cartesian motion (controller node)")
                 self.skill("pick", target[:2])
             fpng, fgt = self.render("wrist", 640, f"held_{step}")
-            gt_held = fgt["blocks"][nxt][2] > 0.1
-            hd = self.jev.held(fpng, nxt, gt_held)
-            self.metric({"event": "held_check", "step": step, "color": nxt, "jev": hd["held"],
+            gt_held = fgt["blocks"][label][2] > 0.1
+            (self.img_dir / f"held_{step}.png").write_bytes(fpng)
+            hd = self.jev.held(fpng, gt_held)
+            self.metric({"event": "held_check", "step": step, "color": label, "jev": hd["held"],
                          "gt": gt_held})
             held_ok = hd["held"] >= HELD_THRESHOLD
             self.overlay(
-                f"Jev Noul: holding the {nxt} cube?  p={hd['held']:.2f} -> "
+                f"Jev Noul: holding an object?  p={hd['held']:.2f} -> "
                 + ("yes, go to tray" if held_ok else "no, retry"),
-                "two Nouls averaged: 'grasping the cube?' and 'cube between the fingers?'",
+                "two Nouls averaged: 'grasping an object?' and 'object between the fingers?'",
                 [f"Query: {hd['latency_s'] * 1000:.0f} ms",
                  f"grasping {hd.get('grasping', hd['held']):.2f}   between {hd.get('between', hd['held']):.2f}"], Image.open(io.BytesIO(fpng)),
                 hold=2.0, panel="What Jev sees (wrist camera on the hand)")
             if not held_ok:
                 self.skill("open")
                 self.skill("park")
-                last_placed = None
+                last_label, last_ref = None, None
                 continue
             off = PLACE_OFFSETS[self.n_placed % len(PLACE_OFFSETS)]
-            self.overlay(f"Executing place({nxt}) into the tray", "")
+            self.overlay("Executing place() into the tray", "")
             self.skill("place", (tray_xy[0] + off[0], tray_xy[1] + off[1]))
             self.skill("park")
             self.n_placed += 1
-            last_placed = nxt
+            last_label, last_ref = label, ref
         self.metric({"event": "end", "steps": step + 1})
         self.overlay("Finished", instruction, hold=1.0)
+
+
+def _centre(b) -> np.ndarray:
+    return np.array([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2])
 
 
 def _center_err(box, gt_box) -> float | None:
     if box is None:
         return None
-    c = np.array([(box[0] + box[2]) / 2, (box[1] + box[3]) / 2])
-    g = np.array([(gt_box[0] + gt_box[2]) / 2, (gt_box[1] + gt_box[3]) / 2])
-    return float(np.linalg.norm(c - g))
+    return float(np.linalg.norm(_centre(box) - _centre(gt_box)))
 
 
-def draw_boxes(img: Image.Image, boxes: dict) -> None:
+def draw_boxes(img: Image.Image, boxes: dict, col: tuple = (90, 90, 100)) -> None:
     d = ImageDraw.Draw(img)
     W, H = img.size
     for name, b in boxes.items():
         if b is None:
             continue
-        col = DRAW_RGB.get(name, (255, 255, 255))
         d.rectangle((b[0] * W, b[1] * H, b[2] * W, b[3] * H), outline=col, width=max(2, W // 200))
         d.text((b[0] * W + 2, max(0, b[1] * H - 14)), name, fill=col)
 

@@ -1,7 +1,8 @@
 """Batch experiments: robustness over layouts and instruction understanding.
 
-uv run python scripts/experiments.py layouts|instructions|summary
-Each run: outputs/exp/<name>/ (metrics.jsonl, jev_log.jsonl, final_state.json, config.json)
+uv run python scripts/experiments.py layouts|instructions|dev|summary
+Each run: outputs/$EXP_NAME/<name>/ (default EXP_NAME=exp; metrics.jsonl, jev_log.jsonl,
+final_state.json, config.json). Jev model pinned with JEV_MODEL (default jev-1.14.0).
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXP = ROOT / "outputs" / "exp"
+EXP = ROOT / "outputs" / os.environ.get("EXP_NAME", "exp")
 TRAY_HALF = 0.09
 COLORS = ["red", "green", "blue", "yellow"]
 
@@ -38,7 +39,7 @@ def run(cfg: dict) -> None:
     out = EXP / cfg["name"]
     out.mkdir(parents=True, exist_ok=True)
     (out / "config.json").write_text(json.dumps(cfg, ensure_ascii=False, indent=2))
-    env = {**os.environ, "RUN_DIR": str(out), "INSTRUCTION": cfg["instruction"], "NO_VIDEO": "1",
+    env = {**os.environ, "JEV_MODEL": os.environ.get("JEV_MODEL", "jev-1.14.0"), "RUN_DIR": str(out), "INSTRUCTION": cfg["instruction"], "NO_VIDEO": "1",
            "LAYOUT_SEED": str(cfg.get("seed", ""))}
     with open(out / "dora.log", "w") as log:
         subprocess.run(["dora", "run", "dataflow.yml", "--stop-after", "8m"], cwd=ROOT, env=env,
@@ -62,7 +63,7 @@ def evaluate(d: Path) -> dict:
     return {
         "name": cfg["name"], "instruction": cfg["instruction"], "expected": sorted(exp),
         "in_tray": sorted(got), "success": got == exp,
-        "first_choice": first["next"], "first_probs": first["probs"],
+        "first_choice": first["next"],
         "picks": len(grasp), "held_fail": sum(r["jev"] < 0.5 for r in held),
         "held_agree": sum((r["jev"] >= 0.5) == r["gt"] for r in held), "held_n": len(held),
         "coarse_mm": [round(r["coarse_err_mm"], 1) for r in grasp],
@@ -92,5 +93,6 @@ if __name__ == "__main__":
     if which == "summary":
         summary()
     else:
-        for cfg in {"layouts": LAYOUTS, "instructions": INSTRUCTIONS}[which]:
+        for cfg in {"layouts": LAYOUTS, "instructions": INSTRUCTIONS,
+                    "dev": LAYOUTS + INSTRUCTIONS}[which]:
             run(cfg)

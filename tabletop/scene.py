@@ -1,5 +1,5 @@
 # pyright: reportAttributeAccessIssue=false
-"""Tabletop scene: Franka Panda (MuJoCo Menagerie) + colored blocks + a tray.
+"""Tabletop scene: Franka Panda (MuJoCo Menagerie) + small objects (cubes / cylinders) + a tray.
 
 The scene XML is generated next to the Menagerie ``panda.xml`` so that its relative
 mesh paths resolve. Everything a node needs (model loading, camera geometry, the
@@ -26,13 +26,44 @@ DEFAULT_INSTRUCTION = (
     "Put the red, blue and green cubes into the tray. Leave the yellow cube alone."
 )
 
-# Distinct, easy-to-name colours. Names are what the instruction / Jev talk about.
+# Default object set: four cubes in distinct colours. Object names are simulator-side
+# identifiers (used for evaluation and display labels only); the controller never sends
+# them to Jev.
 COLORS: dict[str, tuple[float, float, float]] = {
     "red": (0.85, 0.12, 0.12),
     "green": (0.15, 0.7, 0.2),
     "blue": (0.15, 0.3, 0.9),
     "yellow": (0.95, 0.8, 0.1),
 }
+# Extra colours for held-out scenes (never used during development).
+PALETTE: dict[str, tuple[float, float, float]] = {
+    **COLORS,
+    "purple": (0.5, 0.15, 0.7),
+    "orange": (0.98, 0.5, 0.08),
+}
+
+
+def objects_from_env() -> dict[str, tuple[str, str]]:
+    """OBJECTS="red,green,purple,orange:cylinder" -> {name: (colour, shape)}.
+
+    Default: the four development cubes. Shapes: "cube" (4.4 cm) or "cylinder"
+    (4.4 cm diameter and height) - both fit the top-down grasp skill.
+    """
+    spec = os.environ.get("OBJECTS", "")
+    if not spec:
+        return {c: (c, "cube") for c in COLORS}
+    out: dict[str, tuple[str, str]] = {}
+    for item in spec.split(","):
+        colour, _, shape = item.strip().partition(":")
+        shape = shape or "cube"
+        if colour not in PALETTE or shape not in ("cube", "cylinder"):
+            raise ValueError(f"bad OBJECTS entry: {item!r}")
+        name = colour if shape == "cube" else f"{colour}_{shape}"
+        out[name] = (colour, shape)
+    return out
+
+
+OBJECTS = objects_from_env()
 
 # Overhead camera used for perception (looks straight down).
 OVERHEAD_POS = (0.5, 0.0, 1.25)
@@ -67,7 +98,11 @@ DEFAULT_LAYOUT = Layout(
 
 def layout_from_env() -> Layout:
     seed = os.environ.get("LAYOUT_SEED", "")
-    return random_layout(int(seed)) if seed else DEFAULT_LAYOUT
+    if seed:
+        return random_layout(int(seed))
+    if set(OBJECTS) != set(DEFAULT_LAYOUT.blocks):
+        raise ValueError("custom OBJECTS need LAYOUT_SEED")
+    return DEFAULT_LAYOUT
 
 
 def random_layout(seed: int) -> Layout:
@@ -76,7 +111,7 @@ def random_layout(seed: int) -> Layout:
     tray = (0.40, -0.32)
     placed: list[np.ndarray] = []
     blocks: dict[str, tuple[float, float]] = {}
-    for name in COLORS:
+    for name in OBJECTS:
         p = np.array([0.5, 0.0])
         for _ in range(1000):
             p = np.array([rng.uniform(0.40, 0.68), rng.uniform(-0.18, 0.28)])
@@ -119,11 +154,15 @@ def _look_at_xyaxes(pos, target) -> np.ndarray:
 def build_scene_xml(layout: Layout) -> str:
     blocks = []
     for name, (x, y) in layout.blocks.items():
-        r, g, b = COLORS[name]
+        colour, shape = OBJECTS[name]
+        r, g, b = PALETTE[colour]
+        h = BLOCK_HALF
+        geom = (f'type="box" size="{h} {h} {h}"' if shape == "cube"
+                else f'type="cylinder" size="{h} {h}"')
         blocks.append(
-            f'<body name="block_{name}" pos="{x} {y} {BLOCK_HALF}">'
+            f'<body name="block_{name}" pos="{x} {y} {h}">'
             f'<freejoint name="block_{name}_joint"/>'
-            f'<geom type="box" size="{BLOCK_HALF} {BLOCK_HALF} {BLOCK_HALF}" mass="0.05" '
+            f'<geom {geom} mass="0.05" '
             f'rgba="{r} {g} {b} 1" friction="1.5 0.01 0.001" condim="4" solref="0.01 1"/>'
             f"</body>"
         )
@@ -213,7 +252,7 @@ def tcp_pose(model: mujoco.MjModel, data: mujoco.MjData) -> tuple[np.ndarray, np
 
 
 def block_positions(model: mujoco.MjModel, data: mujoco.MjData) -> dict[str, list[float]]:
-    return {n: data.xpos[model.body(f"block_{n}").id].round(4).tolist() for n in COLORS}
+    return {n: data.xpos[model.body(f"block_{n}").id].round(4).tolist() for n in OBJECTS}
 
 
 def tray_position(model: mujoco.MjModel, data: mujoco.MjData) -> list[float]:

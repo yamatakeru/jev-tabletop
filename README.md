@@ -5,14 +5,23 @@ task-level decisions come from TypeSafe Jev** (a "System One" decision model wit
 input). No training, no demonstrations.
 
 ```
- overhead camera ──► Jev: Choice  (which cube next / done?)
-                     Jev: Box     (where is it? coarse -> zoomed crops)
-                     Jev: Noul    (is it already in the tray?)
- wrist camera    ──► Jev: Noul    (is the gripper holding it?)
+ overhead camera ──► Jev: Box x4  (an object the instruction wants moved, still outside
+                                   the tray; 4 spatial tie-breakers -> up to 4 candidates)
+                     Jev: Noul    (anything left to move? / last object in the tray?)
+   close-ups     ──► Jev: Noul    (object at the centre? wanted by the instruction?)
+   zoomed crops  ──► Jev: Box     (the object that looks like the chosen close-up)
+ wrist camera    ──► Jev: Noul    (is the gripper holding an object?)
                          │
                          ▼
           skills (pick / place / park)  ──►  IK + Cartesian motion  ──►  MuJoCo
 ```
+
+**Open vocabulary**: the code never names an object or colour in a Jev question. The
+instruction is passed as text and every question refers to "an object that `instruction`
+asks to put into the tray"; once chosen, the object is tracked by appearance (a close-up
+passed as a `reference` image). The closed-vocabulary version that listed four colours is
+tagged `closed-vocab-v3`. Object names in logs/videos come from the simulator
+(display/evaluation only).
 
 The nodes are wired as a [dora-rs](https://github.com/dora-rs/dora) dataflow
 (`dataflow.yml`): `sim` (MuJoCo + cameras + video), `controller` (skills, IK),
@@ -55,17 +64,28 @@ INTERACTIVE=1 LIVE=1 RUN_DIR=outputs/interactive uv run dora run dataflow_intera
 ### Recovery from a disturbance
 
 ```bash
-# During the 2nd pick a "person" slides the target cube 9 cm; the wrist-camera Noul
-# detects the failed grasp and Jev re-localises the cube.
+# During the 2nd pick a "person" slides the target object 9 cm; the wrist-camera Noul
+# detects the failed grasp and Jev re-localises it.
 RUN_DIR=outputs/demoC DISTURB_STEP=1 uv run dora run dataflow.yml
+```
+
+### Other objects
+
+```bash
+# OBJECTS=colour[:shape],...  colours: red green blue yellow purple orange; shapes: cube, cylinder
+OBJECTS=red,green,blue,yellow,purple,orange:cylinder LAYOUT_SEED=12 \
+INSTRUCTION="Tidy away the round object." RUN_DIR=outputs/round uv run dora run dataflow.yml
 ```
 
 ### Experiments
 
 ```bash
-uv run python scripts/experiments.py layouts       # 5 random layouts
-uv run python scripts/experiments.py instructions  # paraphrased / semantic / Japanese instructions
-uv run python scripts/experiments.py summary       # -> outputs/exp/summary.json
+# development set (5 layouts + 6 instructions); STOP_CONF=none logs two zoom rounds per pick
+EXP_NAME=dev_ov STOP_CONF=none uv run python scripts/experiments.py dev
+EXP_NAME=dev_ov uv run python scripts/experiments.py summary
+uv run python scripts/zoom_analysis.py outputs/dev_ov   # adaptive-zoom threshold (dev data only)
+uv run python scripts/heldout.py run new|old       # pre-registered held-out conditions
+uv run python scripts/heldout.py summary           # -> outputs/heldout_summary.md
 ```
 
 Each run writes `run.mp4` (demo video), `jev_log.jsonl` (every Jev request/answer and
@@ -80,8 +100,9 @@ nodes/controller.py   skills -> Cartesian waypoints -> IK -> joint targets
 nodes/brain.py        task loop: Jev decisions -> skills, verification, metrics
 nodes/ui.py           web UI for the interactive demo (MJPEG stream + instruction box)
 tabletop/scene.py     scene, cameras, pixel <-> floor-plane geometry
-tabletop/jev.py       Jev questions (Choice / Box / Noul) + oracle baseline
-tabletop/locate.py    coarse-to-fine Box localisation on zoomed crops
+tabletop/jev.py       Jev questions (Box / Noul, open vocabulary) + oracle baseline
+tabletop/locate.py    coarse-to-fine Box localisation on zoomed crops (confidence gate,
+                      adaptive depth)
 tabletop/ik.py        damped-least-squares IK
 tabletop/video.py     video composition (robot view + what Jev saw + banner)
 ```
