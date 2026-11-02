@@ -181,10 +181,14 @@ class Brain:
                 crop = t["crop_img"]
                 draw_boxes(crop, {nxt: t["crop_box"]})
                 lat = (t["latency_s"] or 0) * 1000
+                verdict = ("accepted" if t["accepted"]
+                           else "LOW confidence -> rejected, widen the crop and ask again")
                 self.overlay(
-                    f"Jev Box, zoom {t['round'] + 1}/{len(trace)}: locating the {nxt} cube",
-                    f"crop = {t['window'][2] * 100:.0f}% of the overhead image",
-                    [f"Box query: {lat:.0f} ms, confidence {t['conf'] or 0:.2f}"], crop, hold=1.2,
+                    f"Jev Box, query {t['round'] + 1}/{len(trace)}: locating the {nxt} cube",
+                    f"crop = {t['window'][2] * 100:.0f}% of the overhead image; "
+                    f"confidence {t['conf'] or 0:.2f} -> {verdict}",
+                    [f"Box query: {lat:.0f} ms, confidence {t['conf'] or 0:.2f}",
+                     "Confidence gate: accept only if confidence >= 0.30"], crop, hold=1.2,
                     panel="What Jev sees (zoomed crop of the overhead camera)")
             self.overlay(
                 f"Grasp point x={target[0]:.3f} m, y={target[1]:.3f} m",

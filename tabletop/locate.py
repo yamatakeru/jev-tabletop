@@ -40,19 +40,43 @@ def coarse_to_fine(
     ask: Callable[[bytes, Box | None], dict],
     gt: Box | None = None,
     rounds: int = 2,
+    conf_min: float = 0.3,
+    max_queries: int = 5,
 ) -> tuple[Box, list[dict]]:
-    """Zoom in around the current estimate and re-ask Box. The first window adapts to the
-    coarse box size (a wide/uncertain box gets a wider crop); later windows shrink."""
+    """Zoom in around the current estimate and re-ask Box.
+
+    The first window adapts to the coarse box size; accepted rounds shrink the window.
+    Confidence gating: an answer with Box confidence < conf_min (or the target judged not
+    visible) is rejected - the estimate is kept and the crop is widened before asking again.
+    Low Box confidence was found to predict large localisation errors.
+    """
     box = coarse
-    trace = []
-    for r in range(rounds):
+    trace: list[dict] = []
+    accepted = 0
+    widen = 1.0
+    best: tuple[float, Box] | None = None
+    while accepted < rounds and len(trace) < max_queries:
         w = max(box[2] - box[0], box[3] - box[1])
-        size = min(max(w + 0.14, 0.2), 0.5) if r == 0 else 0.14
+        base = min(max(w + 0.14, 0.2), 0.5) if accepted == 0 else 0.14
+        size = min(base * widen, 0.6)
         l0, t0 = crop_window(box, size)
         png, cimg = crop_png(img, l0, t0, size)
         ans = ask(png, to_crop(gt, l0, t0, size) if gt else None)
-        box = to_full(ans["box"], l0, t0, size)
-        trace.append({"round": r, "window": [l0, t0, size], "crop_box": ans["box"],
-                      "conf": ans.get("conf"), "visible": ans.get("visible"),
+        conf = ans.get("conf") or 0.0
+        vis = ans.get("visible")
+        ok = conf >= conf_min and (vis is None or vis >= 0.5)
+        cand = to_full(ans["box"], l0, t0, size)
+        if best is None or conf > best[0]:
+            best = (conf, cand)
+        trace.append({"round": len(trace), "window": [l0, t0, size], "crop_box": ans["box"],
+                      "conf": conf, "visible": vis, "accepted": ok,
                       "latency_s": ans.get("latency_s"), "crop_img": cimg})
+        if ok:
+            box = cand
+            accepted += 1
+            widen = 1.0
+        else:
+            widen *= 1.7
+    if accepted == 0 and best is not None:
+        box = best[1]  # nothing passed the gate: fall back to the most confident answer
     return box, trace
