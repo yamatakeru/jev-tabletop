@@ -1,0 +1,52 @@
+# Interactive demo: open http://127.0.0.1:8765 and type/speak instructions.
+#   INTERACTIVE=1 LIVE=1 RUN_DIR=outputs/interactive \
+#     uv run dora run dataflow_interactive.yml
+nodes:
+  - id: sim
+    path: nodes/sim.py
+    inputs:
+      tick:
+        source: dora/timer/millis/20
+        queue_size: 1
+      joint_cmd: controller/joint_cmd
+      render_req: brain/render_req
+      overlay: brain/overlay
+      disturb: brain/disturb
+      reset: brain/reset
+      finish: brain/finish
+    outputs:
+      - robot_state
+      - camera_image
+      - live_frame
+
+  - id: controller
+    path: nodes/controller.py
+    inputs:
+      robot_state: sim/robot_state
+      skill: brain/skill
+    outputs:
+      - joint_cmd
+      - skill_done
+
+  - id: brain
+    path: nodes/brain.py
+    inputs:
+      camera_image: sim/camera_image
+      skill_done: controller/skill_done
+      command: ui/command
+    outputs:
+      - render_req
+      - skill
+      - overlay
+      - disturb
+      - reset
+      - finish
+
+  - id: ui
+    path: nodes/ui.py
+    inputs:
+      live_frame:
+        source: sim/live_frame
+        queue_size: 1
+    outputs:
+      - command

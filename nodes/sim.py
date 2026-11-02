@@ -28,6 +28,8 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tabletop.scene import (  # noqa: E402
+    BLOCK_HALF,
+    random_layout,
     block_positions,
     layout_from_env,
     load_model,
@@ -79,6 +81,7 @@ def main() -> None:
     tick = 0
     last_cmd_time = -1.0
     record = os.environ.get("NO_VIDEO", "") != "1"
+    live = os.environ.get("LIVE", "") == "1"  # stream composite frames to the web UI
     disturb: dict | None = None  # active scripted disturbance ("a person slides a cube")
     log = open(out_dir / "sim_events.jsonl", "w")  # noqa: SIM115
 
@@ -98,6 +101,11 @@ def main() -> None:
             state = np.concatenate([[data.time], data.qpos[:9], tcp])
             node.send_output("robot_state", pa.array(state))
             active = data.time - last_cmd_time < 0.1
+            if live and tick % 3 == 0:
+                buf = io.BytesIO()
+                Image.fromarray(video.compose(render("front", 832, 624), data.time)).save(
+                    buf, format="JPEG", quality=80)
+                node.send_output("live_frame", pa.array(np.frombuffer(buf.getvalue(), dtype=np.uint8)))
             if record and (active or disturb is not None) and tick % FRAME_EVERY == 0:
                 video.frame(render("front", 832, 624), sim_time=data.time)
         elif eid == "joint_cmd":
@@ -131,6 +139,15 @@ def main() -> None:
                        "end": start + np.array([*req["dxy"], 0.0]), "t0": data.time,
                        "dur": float(req.get("duration", 0.8))}
             log.write(json.dumps({"wall": time.time(), "disturb": req}) + "\n")
+        elif eid == "reset":
+            seed = json.loads(event["value"][0].as_py())["seed"]
+            lay = random_layout(seed)
+            for c, (x, y) in lay.blocks.items():
+                jid = model.joint(f"block_{c}_joint").id
+                adr, dof = model.jnt_qposadr[jid], model.jnt_dofadr[jid]
+                data.qpos[adr:adr + 7] = [x, y, BLOCK_HALF, 1, 0, 0, 0]
+                data.qvel[dof:dof + 6] = 0.0
+            mujoco.mj_forward(model, data)
         elif eid == "finish":
             break
         elif eid == "overlay":

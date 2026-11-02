@@ -61,6 +61,7 @@ class Brain:
         self.model, self.data = load_model(layout_from_env())
         self.jev = JevClient(MODE, run_dir / "jev_log.jsonl")
         self.metrics = open(run_dir / "metrics.jsonl", "w")  # noqa: SIM115
+        self.n_placed = 0
 
     # ------------------------------------------------------------- dora io
     def wait(self, input_id: str) -> dict:
@@ -124,17 +125,16 @@ class Brain:
         return pixel_to_plane(self.model, self.data, u, v, z)
 
     # ---------------------------------------------------------------- loop
-    def run(self) -> None:
-        self.overlay("Starting", INSTRUCTION)
+    def run(self, instruction: str = INSTRUCTION) -> None:
+        self.overlay("Starting", instruction)
         self.skill("park")
         last_placed: str | None = None
-        n_placed = 0
         tray_xy = None
         step = 0
         for step in range(MAX_STEPS):
             png, gt = self.render("overhead", 768, f"overview_{step}")
             gtv = self.gt_view(gt)
-            ov = self.jev.overview(png, INSTRUCTION, last_placed, {**gt, **gtv})
+            ov = self.jev.overview(png, instruction, last_placed, {**gt, **gtv})
             img = Image.open(io.BytesIO(png)).convert("RGB")
             draw_boxes(img, ov["boxes"])
             probs = sorted(ov["next_probs"].items(), key=lambda kv: -kv[1])
@@ -157,11 +157,11 @@ class Brain:
             if tray_xy is None:
                 tray_xy = self.box_to_world(ov["boxes"]["tray"], 0.0)[:2]
             if nxt == "done":
-                self.overlay("Jev: the instruction is satisfied -> done", INSTRUCTION, lines, img,
+                self.overlay("Jev: the instruction is satisfied -> done", instruction, lines, img,
                              hold=3.5)
                 break
             self.overlay(f"Jev decides: pick the {nxt} cube next (p={ov['next_probs'][nxt]:.2f})",
-                         INSTRUCTION, lines, img, hold=2.5)
+                         instruction, lines, img, hold=2.5)
 
             # ---- coarse-to-fine: re-ask Jev Box on zoomed crops for a precise grasp point
             big, _ = self.render("overhead", 1280, f"refine_{step}")
@@ -225,14 +225,14 @@ class Brain:
                 self.skill("park")
                 last_placed = None
                 continue
-            off = PLACE_OFFSETS[n_placed % len(PLACE_OFFSETS)]
+            off = PLACE_OFFSETS[self.n_placed % len(PLACE_OFFSETS)]
             self.overlay(f"Executing place({nxt}) into the tray", "")
             self.skill("place", (tray_xy[0] + off[0], tray_xy[1] + off[1]))
             self.skill("park")
-            n_placed += 1
+            self.n_placed += 1
             last_placed = nxt
         self.metric({"event": "end", "steps": step + 1})
-        self.overlay("Finished", INSTRUCTION, hold=1.0)
+        self.overlay("Finished", instruction, hold=1.0)
 
 
 def _center_err(box, gt_box) -> float | None:
@@ -254,6 +254,26 @@ def draw_boxes(img: Image.Image, boxes: dict) -> None:
         d.text((b[0] * W + 2, max(0, b[1] * H - 14)), name, fill=col)
 
 
+def interactive(brain: Brain) -> None:
+    """Wait for instructions typed/spoken in the web UI; run one episode per instruction."""
+    brain.skill("park")
+    while True:
+        brain.overlay("Waiting for your instruction...", "type or speak in the web UI")
+        ev = brain.wait("command")
+        cmd = json.loads(ev["value"][0].as_py())
+        if cmd.get("reset") is not None:
+            brain.node.send_output("reset", pa.array([json.dumps({"seed": int(cmd["reset"])})]))
+            brain.n_placed = 0
+            continue
+        text = (cmd.get("text") or "").strip()
+        if not text:
+            continue
+        brain.metric({"event": "instruction", "text": text})
+        t0 = time.time()
+        brain.run(text)
+        brain.metric({"event": "wall_time_s", "value": time.time() - t0, "text": text})
+
+
 def main() -> None:
     run_dir = Path(os.environ.get("RUN_DIR", "outputs/latest"))
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -261,8 +281,11 @@ def main() -> None:
     brain = Brain(node, run_dir)
     t0 = time.time()
     try:
-        brain.run()
-        brain.metric({"event": "wall_time_s", "value": time.time() - t0})
+        if os.environ.get("INTERACTIVE", "") == "1":
+            interactive(brain)
+        else:
+            brain.run()
+            brain.metric({"event": "wall_time_s", "value": time.time() - t0})
     except Stop:
         return
     finally:

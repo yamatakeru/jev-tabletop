@@ -47,10 +47,10 @@ class VideoComposer:
             self.thumb = img.resize((THUMB, THUMB))
 
     def frame(self, robot_rgb: np.ndarray, sim_time: float) -> None:
-        self.writer.append_data(self._compose(robot_rgb, sim_time))
+        self.writer.append_data(self.compose(robot_rgb, sim_time))
 
     def hold(self, robot_rgb: np.ndarray, seconds: float, sim_time: float) -> None:
-        f = self._compose(robot_rgb, sim_time)
+        f = self.compose(robot_rgb, sim_time)
         for _ in range(int(seconds * self.fps)):
             self.writer.append_data(f)
 
@@ -68,7 +68,7 @@ class VideoComposer:
         self.writer.close()
 
     # ------------------------------------------------------------- drawing
-    def _compose(self, robot_rgb: np.ndarray, sim_time: float) -> np.ndarray:
+    def compose(self, robot_rgb: np.ndarray, sim_time: float) -> np.ndarray:
         canvas = Image.new("RGB", (W, H), (24, 28, 36))
         canvas.paste(Image.fromarray(robot_rgb).resize((LEFT_W, LEFT_H)), (0, 0))
         d = ImageDraw.Draw(canvas)
