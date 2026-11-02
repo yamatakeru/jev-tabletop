@@ -35,6 +35,7 @@ class VideoComposer:
                                          macro_block_size=8)
         self.overlay: dict = {}
         self.thumb: Image.Image | None = None
+        self.panel = "What Jev sees (overhead camera)"
         self.f_title = _font(30)
         self.f_text = _font(19)
         self.f_small = _font(16)
@@ -45,6 +46,8 @@ class VideoComposer:
         if ov.get("image_png"):
             img = Image.open(io.BytesIO(base64.b64decode(ov["image_png"]))).convert("RGB")
             self.thumb = img.resize((THUMB, THUMB))
+            # The panel caption belongs to the thumbnail: only change it with a new image.
+            self.panel = ov.get("panel", "What Jev sees (overhead camera)")
 
     def frame(self, robot_rgb: np.ndarray, sim_time: float) -> None:
         self.writer.append_data(self.compose(robot_rgb, sim_time))
@@ -73,7 +76,7 @@ class VideoComposer:
         canvas.paste(Image.fromarray(robot_rgb).resize((LEFT_W, LEFT_H)), (0, 0))
         d = ImageDraw.Draw(canvas)
         d.text((12, 8), f"sim t = {sim_time:5.1f} s", font=self.f_small, fill=(30, 30, 30))
-        d.text((PANEL_X, 6), self.overlay.get("panel", "What Jev sees (overhead camera)"), font=self.f_small,
+        d.text((PANEL_X, 6), self.panel, font=self.f_small,
                fill=(170, 190, 220))
         if self.thumb is not None:
             canvas.paste(self.thumb, (PANEL_X, 28))
