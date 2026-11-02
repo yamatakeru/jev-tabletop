@@ -17,12 +17,21 @@ THUMB = 424
 BANNER_Y = LEFT_H
 
 
-def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    for path in (
-        "/System/Library/Fonts/Supplemental/Arial.ttf",
-        "/System/Library/Fonts/Helvetica.ttc",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-    ):
+LATIN_FONTS = (
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+)
+# Used for text with non-Latin characters (e.g. a Japanese instruction).
+CJK_FONTS = (
+    "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+)
+
+
+def _font(size: int, text: str = "") -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    paths = (*CJK_FONTS, *LATIN_FONTS) if not text.isascii() else LATIN_FONTS
+    for path in paths:
         if Path(path).exists():
             return ImageFont.truetype(path, size)
     return ImageFont.load_default(size=size)
@@ -60,9 +69,9 @@ class VideoComposer:
     def title_card(self, title: str, lines: list[str], seconds: float) -> None:
         img = Image.new("RGB", (W, H), (20, 24, 32))
         d = ImageDraw.Draw(img)
-        d.text((80, 220), title, font=_font(56), fill=(255, 255, 255))
+        d.text((80, 220), title, font=_font(56, title), fill=(255, 255, 255))
         for i, line in enumerate(lines):
-            d.text((80, 320 + i * 44), line, font=_font(26), fill=(200, 210, 230))
+            d.text((80, 320 + i * 44), line, font=_font(26, line), fill=(200, 210, 230))
         arr = np.asarray(img)
         for _ in range(int(seconds * self.fps)):
             self.writer.append_data(arr)
@@ -85,8 +94,9 @@ class VideoComposer:
             d.text((PANEL_X, y), line, font=self.f_small, fill=(230, 230, 230))
             y += 22
         d.rectangle((0, BANNER_Y, W, H), fill=(14, 16, 22))
-        d.text((16, BANNER_Y + 14), self.overlay.get("title", ""), font=self.f_title,
-               fill=(255, 220, 120))
-        d.text((16, BANNER_Y + 56), self.overlay.get("subtitle", ""), font=self.f_text,
-               fill=(200, 210, 230))
+        title, sub = self.overlay.get("title", ""), self.overlay.get("subtitle", "")
+        d.text((16, BANNER_Y + 14), title,
+               font=self.f_title if title.isascii() else _font(30, title), fill=(255, 220, 120))
+        d.text((16, BANNER_Y + 56), sub,
+               font=self.f_text if sub.isascii() else _font(19, sub), fill=(200, 210, 230))
         return np.asarray(canvas)
