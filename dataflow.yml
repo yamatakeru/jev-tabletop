@@ -1,0 +1,35 @@
+# Jev x dora-rs tabletop sorting. Run:  uv run dora run dataflow.yml
+nodes:
+  - id: sim
+    path: nodes/sim.py
+    inputs:
+      tick:
+        source: dora/timer/millis/20
+        queue_size: 1
+      joint_cmd: controller/joint_cmd
+      render_req: brain/render_req
+      overlay: brain/overlay
+      finish: brain/finish
+    outputs:
+      - robot_state
+      - camera_image
+
+  - id: controller
+    path: nodes/controller.py
+    inputs:
+      robot_state: sim/robot_state
+      skill: brain/skill
+    outputs:
+      - joint_cmd
+      - skill_done
+
+  - id: brain
+    path: nodes/brain.py
+    inputs:
+      camera_image: sim/camera_image
+      skill_done: controller/skill_done
+    outputs:
+      - render_req
+      - skill
+      - overlay
+      - finish
